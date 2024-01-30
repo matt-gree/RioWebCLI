@@ -2,15 +2,16 @@ import requests
 import json
 import os
 
-def create_community(community_data):
+
+def create_community(community_name, type, private, global_link, desc, RIOKEY):
     headers = {'Content-Type': 'application/json'}
 
     community_data = {
-        "community_name": "MattGree Rio Community",
-        "type": "Unofficial",
-        "private": 0,       
-        "global_link": 1,  
-        "desc": "MattGree Rio Community Building Test",
+        "community_name": community_name,
+        "type": type,
+        "private": private,       
+        "global_link": global_link,  
+        "desc": desc,
         "rio_key": RIOKEY
     }
 
