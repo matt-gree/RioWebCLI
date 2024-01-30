@@ -11,6 +11,7 @@ import os
 import json
 
 def manage_community():
+    print()
     history = InMemoryHistory()
     session = PromptSession(history=history, auto_suggest=AutoSuggestFromHistory())
 
@@ -40,20 +41,46 @@ def manage_community():
         print(f"Description: {description}")
 
         # Confirm submission
-        confirmation = session.prompt('Do you want to submit this information? (y/n): ')
+        confirmation = session.prompt('Do you want to submit this information? (y/n): \n')
 
         if confirmation.lower() == 'y':
             web_functions.create_community(community_name, community_type, is_private, global_link, description, RIOKEY)
         else:
             print("Community creation canceled.")
 
-    print(user_input)
+    def check_community_sponsor():
+        community_name = session.prompt('Enter the name of the community: ')
+        print()
+        web_functions.check_sponsored_community(community_name, RIOKEY)
+
+    def invite_users_to_community():
+        print('Not yet functional')
+
+    def update_community_admins():
+        print('Not yet functional')
+
+    def display_community_members():
+        community_name = session.prompt('Enter the name of the community: ')
+        print()
+        web_functions.print_community_members(community_name, RIOKEY)
+
+    def list_community_tags():
+        community_name = session.prompt('Enter the name of the community: ')
+        print()
+        web_functions.print_community_tags(community_name, RIOKEY)
+
     if user_input == 'createcommunity':
         create_community()
     elif user_input == 'checkcommunitysponsor':
-        print()
-    elif user_input == 'tags':
-        manage_tags()
+        check_community_sponsor()
+    elif user_input == 'inviteuserstocommunity':
+        invite_users_to_community()
+    elif user_input == 'updatecommunityadmins':
+        update_community_admins()
+    elif user_input == 'displaycommunitymembers':
+        display_community_members()
+    elif user_input == 'listcommunitytags':
+        list_community_tags()
     elif user_input == 'exit':
         return
     else:
@@ -78,11 +105,23 @@ if __name__ == "__main__":
     history = InMemoryHistory()
     session = PromptSession(history=history, auto_suggest=AutoSuggestFromHistory())
 
-    print("Welcome to the RioWeb Community Management Tool!")
+                
+    formatted_text = '''
+    ______ _         _    _      _       _____                            ___  ___                                  
+    | ___ (_)       | |  | |    | |     /  __ \\                           |  \\/  |                                  
+    | |_/ /_  ___   | |  | | ___| |__   | /  \\/ ___  _ __ ___  _ __ ___   | .  . | __ _ _ __   __ _  __ _  ___ _ __ 
+    |    /| |/ _ \\  | |/\\| |/ _ \\ '_ \\  | |    / _ \\| '_ ` _ \\| '_ ` _ \\  | |\\/| |/ _` | '_ \\ / _` |/ _` |/ _ \\ '__|
+    | |\\ \\| | (_) | \\  /\\  /  __/ |_) | | \\__/\\ (_) | | | | | | | | || |  | |  | | (_| | | | | (_| | (_| |  __/ |   
+    \\_| \\_|_|\\___/   \\/  \\/ \\___|_.__/   \\____/\\___/|_| |_| |_|_| |_||_|  \\_|  |_|\\__,_|_| |_|\\__,_|\\__, |\\___|_|   
+                                                                                                    __/  |          
+                                                                                                    |___/           
+'''
+
+    print(formatted_text)
 
     while True:
         initial_completer = WordCompleter(['Community', 'Tagset', 'Tags', 'Exit'], ignore_case=True)
-        user_input = session.prompt('Choose what to manage:\nCommunity, TagSet, Tags\nManage: ', completer=initial_completer)
+        user_input = session.prompt('\nChoose what to manage:\nCommunity, TagSet, Tags\nManage: ', completer=initial_completer)
 
         user_input = user_input.lower().strip()
         

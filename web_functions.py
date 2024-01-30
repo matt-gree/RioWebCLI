@@ -25,7 +25,7 @@ def create_community(community_name, type, private, global_link, desc, RIOKEY):
         print(response.text)
 
 
-def check_sponsored_community(community_name):
+def check_sponsored_community(community_name, RIOKEY):
     url = "https://api.projectrio.app/community/sponsor"
     headers = {
         "Content-Type": "application/json",
@@ -41,10 +41,7 @@ def check_sponsored_community(community_name):
     if response.status_code == 200:
         result = response.json()
         sponsor_username = result.get('sponsor')
-        if sponsor_username is not None:
-            print(f"You are currently sponsoring the community: {sponsor_username}")
-        else:
-            print("You are not sponsoring any community at the moment.")
+        print(f"{sponsor_username} is currently sponsoring the {community_name} community")
     else:
         print(f"Error: {response.status_code} - {response.text}")
 
@@ -81,7 +78,7 @@ def invite_users_to_community(community_name, users_to_invite):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def print_community_members(community_name):
+def print_community_members(community_name, RIOKEY):
     """
     Print information about the members of a specified community.
 
@@ -101,13 +98,15 @@ def print_community_members(community_name):
     # Check the response
     if response.status_code == 200:
         members_list = response.json().get('Members', [])
-        print(f"Members of community '{community_name}': {members_list}")
+        print(f"Members of community '{community_name}': ")
+        for member in members_list:
+            print(member)
     else:
         error_message = f"Failed to get members of community '{community_name}'. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def print_community_tags(community_name):
+def print_community_tags(community_name, RIOKEY):
     """
     Print information about the tags of a specified community.
 
@@ -129,7 +128,9 @@ def print_community_tags(community_name):
     # Check the response
     if response.status_code == 200:
         tags_info_list = response.json().get('Tags', [])
-        print(f"Tags of community '{community_name}': {tags_info_list}")
+        print(f"Tags of community '{community_name}':" )
+        for tag in tags_info_list:
+            print(tag)
     else:
         error_message = f"Failed to get tags of community '{community_name}'. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
