@@ -136,7 +136,7 @@ def print_community_tags(community_name, RIOKEY):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def update_user_admin_status(community_name, username, make_admin=True):
+def update_user_admin_status(community_name, username, RIOKEY, make_admin=True):
     """
     Update the admin status of a user within a community.
 
@@ -171,7 +171,7 @@ def update_user_admin_status(community_name, username, make_admin=True):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def print_all_tags(tag_types=None, community_ids=None):
+def print_all_tags(RIOKEY, tag_types=None, community_ids=None):
     """
     Print information about all tags or filtered tags based on type and communities.
 
@@ -183,24 +183,28 @@ def print_all_tags(tag_types=None, community_ids=None):
 
     # Prepare the payload
     payload = {
-        #'Client': 'no',
-        # 'Types': tag_types,
-        # 'Communities': community_ids
     }
+    if tag_types is not None:
+        payload['tag_types'] = tag_types
+
+    if community_ids is not None:
+        payload['community_ids'] = community_ids
 
     # Make the API request
+    print(payload)
     response = requests.post('https://api.projectrio.app/tag/list', json=payload)
 
     # Check the response
     if response.status_code == 200:
         tags_list = response.json().get('Tags', [])
-        print(f"All Tags: {tags_list}")
+        for tag in tags_list:
+            print(tag)
     else:
         error_message = f"Failed to get tags. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def create_tag_set(name, desc, type, community_name, tags, start_date, end_date, tag_set_id=None):
+def create_tag_set(name, desc, type, community_name, tags, start_date, end_date, RIOKEY, tag_set_id=None):
     """
     Create a new tag set.
 
@@ -224,9 +228,11 @@ def create_tag_set(name, desc, type, community_name, tags, start_date, end_date,
         'tags': tags,
         'start_date': start_date,
         'end_date': end_date,
-        'tag_set_id': tag_set_id,
         'rio_key': RIOKEY
     }
+    if tag_set_id is not None:
+            payload['tag_set_id']: tag_set_id
+            payload = payload.pop('tags')
 
     # Make the API request
     response = requests.post('https://api.projectrio.app/tag_set/create', json=payload)
@@ -264,7 +270,7 @@ def get_tag_set_tags(tag_set_id):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def get_tag_sets(active_only=False, communities=None):
+def get_tag_sets(RIOKEY, active_only='n', communities=None):
     """
     Get information about all tag sets.
 
@@ -280,10 +286,12 @@ def get_tag_sets(active_only=False, communities=None):
 
     # Prepare the payload
     payload = {
-        'Active': 'yes' if active_only else 'no',
-        #'Communities': communities,
-        'Rio Key': RIOKEY
+        'Active': active_only,
+        #'Rio Key': RIOKEY
     }
+
+    if communities is not None:
+        payload['Communities'] = communities
 
     # Make the API request
     response = requests.post('https://api.projectrio.app/tag_set/list', json=payload)
@@ -305,7 +313,7 @@ def get_tag_sets(active_only=False, communities=None):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def delete_tag_set(tag_set_name):
+def delete_tag_set(RIOKEY, tag_set_name):
     """
     Delete a tag set by name.
 
@@ -331,7 +339,7 @@ def delete_tag_set(tag_set_name):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def update_tag_set(tag_set_id, new_name=None, new_desc=None, new_type=None, new_start_date=None, new_end_date=None, new_tag_ids=None):
+def update_tag_set(RIOKEY, tag_set_id, new_name=None, new_desc=None, new_type=None, new_start_date=None, new_end_date=None, new_tag_ids=None):
     """
     Update parameters of a tag set.
 
@@ -348,6 +356,7 @@ def update_tag_set(tag_set_id, new_name=None, new_desc=None, new_type=None, new_
     # Prepare the payload
     payload = {
         'tag_set_id': tag_set_id,
+        'rio_key': RIOKEY
     }
 
     # Add optional parameters to the payload
@@ -390,7 +399,7 @@ if __name__ == "__main__":
     # print_community_members('PJandFriends')
     # print_community_tags('PJandFriends')
     # print_all_tags(tag_types='Competition')
-    # get_tag_set_tags(59)
+    get_tag_set_tags(51)
     # get_tag_sets()
     # create_tag_set("NNL Training",
     #                "NNL Season 5 Spring Training mode for non-league scheduled games",
