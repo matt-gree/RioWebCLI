@@ -360,17 +360,17 @@ def update_tag_set(RIOKEY, tag_set_id, new_name=None, new_desc=None, new_type=No
     }
 
     # Add optional parameters to the payload
-    if new_name is not None:
+    if new_name:
         payload['name'] = new_name
-    if new_desc is not None:
+    if new_desc:
         payload['desc'] = new_desc
-    if new_type is not None:
+    if new_type:
         payload['type'] = new_type
-    if new_start_date is not None:
+    if new_start_date:
         payload['start_date'] = new_start_date
-    if new_end_date is not None:
+    if new_end_date:
         payload['end_date'] = new_end_date
-    if new_tag_ids is not None:
+    if new_tag_ids:
         payload['tag_ids'] = new_tag_ids
 
     # Make the API request
@@ -399,7 +399,7 @@ if __name__ == "__main__":
     # print_community_members('PJandFriends')
     # print_community_tags('PJandFriends')
     # print_all_tags(tag_types='Competition')
-    get_tag_set_tags(51)
+    # get_tag_set_tags(51)
     # get_tag_sets()
     # create_tag_set("NNL Training",
     #                "NNL Season 5 Spring Training mode for non-league scheduled games",

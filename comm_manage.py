@@ -120,6 +120,9 @@ def manage_tagset():
         def validate(self, document):
             text = document.text
 
+            if text == '':
+                return
+
             try:
                 datetime.strptime(text, '%m-%d-%Y')
             except ValueError:
@@ -179,16 +182,18 @@ def manage_tagset():
         tag_set_id = int(prompt('Enter the ID of the tag set to update: '))
 
         new_name = prompt('Enter new name for the tag set (press Enter to skip): ')
+
         new_desc = prompt('Enter new description for the tag set (press Enter to skip): ')
+        
         new_type = prompt('Enter the new type of the tag set (Season, League, Tournament): ', completer=tagset_type_completer)
 
         # Prompt for start date with validation
-        new_start_date = prompt('Enter new start date for the tag set (YYYY-MM-DD, press Enter to skip): ', validator=DateValidator())
-        new_start_date = datetime.strptime(new_start_date, '%Y-%m-%d').timestamp() if new_start_date else None
+        new_start_date = prompt('Enter new start date for the tag set (MM-DD-YYYY, press Enter to skip): ', validator=DateValidator())
+        new_start_date = datetime.strptime(new_start_date, '%m-%d-%Y').timestamp() if new_start_date else None
 
         # Prompt for end date with validation
-        new_end_date = prompt('Enter new end date for the tag set (YYYY-MM-DD, press Enter to skip): ', validator=DateValidator())
-        new_end_date = datetime.strptime(new_end_date, '%Y-%m-%d').timestamp() if new_end_date else None
+        new_end_date = prompt('Enter new end date for the tag set (MM-DD-YYYY, press Enter to skip): ', validator=DateValidator())
+        new_end_date = datetime.strptime(new_end_date, '%m-%d-%Y').timestamp() if new_end_date else None
 
         new_tag_ids_input = prompt('Enter new tag IDs for the tag set (comma-separated, press Enter to skip): ')
         new_tag_ids = [int(tag_id.strip()) for tag_id in new_tag_ids_input.split(',') if tag_id.strip()] if new_tag_ids_input else None
