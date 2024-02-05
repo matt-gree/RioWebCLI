@@ -236,8 +236,8 @@ def manage_tagset():
     
 
 def manage_tags():
-    community_name = session.prompt('Enter the name of the community to edit (Tags): ')
-    print(f"Editing community (Tags): {community_name}")
+    user_input = session.prompt('What would you like to do?\nPrint Tags, Create Tag, Update Tag: ')
+    user_input = user_input.lower().replace(" ", "")
 
     def print_tags():
         tag_type_completer = WordCompleter(["Component", "Competition", "Community", "Gecko Code"], ignore_case=True)
@@ -251,6 +251,17 @@ def manage_tags():
         community_ids_list = [int(community_id.strip()) for community_id in community_ids_input.split(',') if community_id.strip()] if community_ids_input else None
 
         web_functions.print_all_tags(RIOKEY, tag_types=tag_types_list, community_ids=community_ids_list)
+
+    if user_input == 'printtags':
+        print_tags()
+    elif user_input == 'createtag':
+        print('Not yet available')
+    elif user_input == 'updatetag':
+        print('Not yet available')
+    elif user_input == 'exit':
+        return
+    else:
+        print("Invalid option. Please choose \nCreate Tag Set, Update Tag Set, Delete Tag Set, Print Tag Sets, Show Tag Set Tags")
 
 if __name__ == "__main__":
     if os.path.exists('rio_key.json'):

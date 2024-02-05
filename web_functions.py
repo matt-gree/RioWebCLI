@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+from datetime import datetime, timezone, timedelta
 
 
 def create_community(community_name, type, private, global_link, desc, RIOKEY):
@@ -191,14 +192,15 @@ def print_all_tags(RIOKEY, tag_types=None, community_ids=None):
         payload['community_ids'] = community_ids
 
     # Make the API request
-    print(payload)
     response = requests.post('https://api.projectrio.app/tag/list', json=payload)
 
     # Check the response
     if response.status_code == 200:
         tags_list = response.json().get('Tags', [])
         for tag in tags_list:
-            print(tag)
+            activity = 'active' if tag['active'] == True else 'inactive'
+            date_string = datetime.utcfromtimestamp(tag['date_created']).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')
+            print(f'Name: {tag["name"]} ({activity})\nDescription: {tag["desc"]}\nTag ID: {tag["id"]}\nCommunity ID: {tag["comm_id"]}\nTag Type: {tag["type"]}\nDate Created: {date_string} EST\n')
     else:
         error_message = f"Failed to get tags. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
