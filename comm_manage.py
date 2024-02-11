@@ -33,6 +33,14 @@ def manage_community():
     history = InMemoryHistory()
     session = PromptSession(history=history, auto_suggest=AutoSuggestFromHistory())
 
+    tags_list = web_functions.get_tags(RIOKEY, tag_types=['Community'])
+    community_names_list = []
+
+    for tag in tags_list:
+        community_names_list.append(tag['name'])
+    
+    community_names_completer = WordCompleter(community_names_list, ignore_case=True)
+
     community_manage_completer = WordCompleter(['Create Community', 'Check Community Sponsor', 'Invite Users to Community', 'Update Community Admins', 'Display Community Members', 'List Community Tags', 'Exit'], ignore_case=True)
     user_input = session.prompt('What would you like to do?\nCreate Community, Check Community Sponsor, Invite Users to Community, Update Community Admins, Display Community Members, List Community Tags\nSelection: ', completer=community_manage_completer)
 
@@ -67,7 +75,7 @@ def manage_community():
             print("Community creation canceled.")
 
     def check_community_sponsor():
-        community_name = session.prompt('Enter the name of the community: ')
+        community_name = session.prompt('Enter the name of the community: ', completer=community_names_completer)
         print()
         web_functions.check_sponsored_community(community_name, RIOKEY)
 
@@ -78,12 +86,12 @@ def manage_community():
         print('Not yet functional')
 
     def display_community_members():
-        community_name = session.prompt('Enter the name of the community: ')
+        community_name = session.prompt('Enter the name of the community: ', completer=community_names_completer)
         print()
         web_functions.print_community_members(community_name, RIOKEY)
 
     def list_community_tags():
-        community_name = session.prompt('Enter the name of the community: ')
+        community_name = session.prompt('Enter the name of the community: ', completer=community_names_completer)
         print()
         web_functions.print_community_tags(community_name, RIOKEY)
 
@@ -256,7 +264,6 @@ def manage_tagset():
     else:
         print("Invalid option. Please choose \nCreate Tag Set, Update Tag Set, Delete Tag Set, Print Tag Sets, Show Tag Set Tags")
     
-
 def manage_tags():
     user_input = session.prompt('What would you like to do?\nPrint Tags, Create Tag, Update Tag: ')
     user_input = user_input.lower().replace(" ", "")

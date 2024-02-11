@@ -186,7 +186,7 @@ def get_tags(RIOKEY, tag_types=None, community_ids=None, print_option=False):
     payload = {
     }
     if tag_types is not None:
-        payload['tag_types'] = tag_types
+        payload['Types'] = tag_types
 
     if community_ids is not None:
         payload['community_ids'] = community_ids
