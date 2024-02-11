@@ -172,7 +172,7 @@ def update_user_admin_status(community_name, username, RIOKEY, make_admin=True):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def print_all_tags(RIOKEY, tag_types=None, community_ids=None):
+def get_tags(RIOKEY, tag_types=None, community_ids=None, print_option=False):
     """
     Print information about all tags or filtered tags based on type and communities.
 
@@ -197,10 +197,15 @@ def print_all_tags(RIOKEY, tag_types=None, community_ids=None):
     # Check the response
     if response.status_code == 200:
         tags_list = response.json().get('Tags', [])
-        for tag in tags_list:
-            activity = 'active' if tag['active'] == True else 'inactive'
-            date_string = datetime.utcfromtimestamp(tag['date_created']).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')
-            print(f'Name: {tag["name"]} ({activity})\nDescription: {tag["desc"]}\nTag ID: {tag["id"]}\nCommunity ID: {tag["comm_id"]}\nTag Type: {tag["type"]}\nDate Created: {date_string} EST\n')
+        if print_option == True:
+            for tag in tags_list:
+                print('\n')
+                activity = 'active' if tag['active'] else 'inactive'
+                date_string = datetime.utcfromtimestamp(tag['date_created']).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')
+                print(f'Name: {tag["name"]} ({activity})\nDescription: {tag["desc"]}\nTag ID: {tag["id"]}\nCommunity ID: {tag["comm_id"]}\nTag Type: {tag["type"]}\nDate Created: {date_string} EST')
+                if tag['type'] == 'Gecko Code':
+                    print(f'Gecko Code:\n{tag["gecko_code"]}\nGecko Code Desc: {tag["gecko_code_desc"]}')
+        return tags_list
     else:
         error_message = f"Failed to get tags. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
@@ -233,7 +238,7 @@ def create_tag_set(name, desc, type, community_name, tags, start_date, end_date,
         'rio_key': RIOKEY
     }
     if tag_set_id is not None:
-            payload['tag_set_id']: tag_set_id
+            payload['tag_set_id'] = tag_set_id
             payload = payload.pop('tags')
 
     # Make the API request
@@ -385,6 +390,34 @@ def update_tag_set(RIOKEY, tag_set_id, new_name=None, new_desc=None, new_type=No
     else:
         error_message = f"Failed to update tag set. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
+
+
+def create_tag(RIOKEY, tag_name, desc, community_name, tag_type, gecko_code=None, gecko_code_desc=None):
+
+    payload = {
+        'name': tag_name,
+        'desc': desc,
+        'community_name': community_name,
+        'type': tag_type,
+        'rio_key': RIOKEY
+    }
+
+    if (gecko_code_desc != None) and (gecko_code != None):
+        payload['gecko_code_desc'] = gecko_code_desc
+        payload['gecko_code'] = gecko_code
+
+    print(payload)
+
+    response = requests.post('https://api.projectrio.app/tag/create', json=payload)
+
+    # Check the response
+    if response.status_code == 200:
+        success_message = response.json()
+        print(success_message)
+    else:
+        error_message = f"Failed to create tag set. Status code: {response.status_code}"
+        print(f"Error: {error_message}\nDetails: {response.text}")
+
 
 if __name__ == "__main__":
     if os.path.exists('rio_key.json'):

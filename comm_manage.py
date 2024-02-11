@@ -8,9 +8,10 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.validation import Validator, ValidationError
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import os
 import json
+import string
 end_completer =  WordCompleter([], ignore_case=True)
 
 class CommaSeparatedIntegersValidator(Validator):
@@ -127,7 +128,28 @@ def manage_tagset():
                 datetime.strptime(text, '%m-%d-%Y')
             except ValueError:
                 raise ValidationError(message='Invalid date format. Use MM-DD-YYYY.')
+            
+    def tag_search_completion():
+        tags_list = web_functions.get_tags(RIOKEY, tag_types=['gecko_code', 'component'])
+        print(tags_list)
+        tags_dict = {}
+        tag_completer_list = []
+        for tag in tags_list:
+            tag_completer_list.append(tag['name'])
+            tags_dict[tag['name']] = tag
 
+        tag_input_list = []
+        while True: 
+            tag_name_completer = session.prompt('Which tags would you like to add?\nInput: ', completer=WordCompleter(tag_completer_list, ignore_case=True))
+            date_string = datetime.utcfromtimestamp(tags_dict[tag_name_completer]['date_created']).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')
+            print(f'\nName: {tags_dict[tag_name_completer]["name"]}\nDescription: {tags_dict[tag_name_completer]["desc"]}\nTag ID: {tags_dict[tag_name_completer]["id"]}\nCommunity ID: {tags_dict[tag_name_completer]["comm_id"]}\nTag Type: {tags_dict[tag_name_completer]["type"]}\nDate Created: {date_string} EST\n')
+            tag_input_list.append(tags_dict[tag_name_completer]["id"])
+            continue_prompt = session.prompt('Tag Added! Would you like to add another? (y/n): ')
+            if continue_prompt == 'n':
+                break
+
+        return tags_list
+        
     def create_tag_set():
         print("Welcome to the Tag Set Creation Tool!")
         name = prompt('Enter the name of the tag set: ')
@@ -136,7 +158,7 @@ def manage_tagset():
         community_name = prompt('Enter the name of your community: ', completer=end_completer)
         
         # Prompt for tags (assuming comma-separated tag IDs)
-        tags_input = prompt('Enter the tag IDs (comma-separated) associated with the tag set: ')
+        tags_input = tag_search_completion()
         if ',' in tags_input:
             tags = [int(tag_id.strip()) for tag_id in tags_input.split(',')]
         else:
@@ -239,23 +261,82 @@ def manage_tags():
     user_input = session.prompt('What would you like to do?\nPrint Tags, Create Tag, Update Tag: ')
     user_input = user_input.lower().replace(" ", "")
 
-    def print_tags():
-        tag_type_completer = WordCompleter(["Component", "Competition", "Community", "Gecko Code"], ignore_case=True)
-            
+    tag_type_completer = WordCompleter(["Component", "Competition", "Community", "Gecko Code"], ignore_case=True)
+    tag_type_create_completer = WordCompleter(["Component", "Gecko Code"], ignore_case=True)
+
+    def print_tags(): 
         tag_types_input = prompt('Enter tag types (comma-separated, press Enter to skip)\nComponent, Competition, Community, Gecko Code: ', completer=tag_type_completer)
-        tag_types_list = [int(tag_type.strip()) for tag_type in tag_types_input.split(',') if tag_type.strip()] if tag_types_input else None
+        tag_types_list = [tag_type.strip() for tag_type in tag_types_input.split(',') if tag_type.strip()] if tag_types_input else None
 
         print(tag_types_list)
 
         community_ids_input = prompt('Enter community IDs (comma-separated, press Enter to skip): ', validator=CommaSeparatedIntegersValidator())
         community_ids_list = [int(community_id.strip()) for community_id in community_ids_input.split(',') if community_id.strip()] if community_ids_input else None
 
-        web_functions.print_all_tags(RIOKEY, tag_types=tag_types_list, community_ids=community_ids_list)
+        web_functions.get_tags(RIOKEY, tag_types=tag_types_list, community_ids=community_ids_list, print_option=True)
+
+    def create_tag():
+        tag_name = session.prompt('Enter a name for the new tag: ')
+        desc = session.prompt('Enter a description for the new tag: ')
+        community_name = session.prompt('Enter the community name where the new tag will be created: ')
+        tag_type = prompt('Enter tag type (Component, Gecko Code): ', completer=tag_type_create_completer)
+
+        if tag_type == 'Gecko Code':
+            gecko_code = prompt('Enter the gecko code: ')
+            if gecko_code[-1] != '\n':
+                gecko_code += '\n'
+            gecko_code_desc = prompt('Enter a description of the Gecko Code: ')
+        else:
+            gecko_code = None
+            gecko_code_desc = None
+
+        def validate_gecko_code(in_str):
+            index = 0
+            for char in in_str:
+                if index == 17:
+                    if char != '\n':
+                        return (False, "Invalid Gecko Code: Each line of 17 charccters must be seperated by a newline")
+                    index = 0
+                elif index == 8:
+                    if char != ' ':
+                        return (False, "Invalid Gecko Code: There must be a space between memory address and value")   
+                    index+=1
+                elif index <= 16:
+                    if char not in string.hexdigits:
+                        return (False, "Invalid Gecko Code: Gecko code must be made of hexvalues only")
+                    index+=1
+                #After the for loop 
+            if (index != 0): #Loop ended in the middle of a line
+                return (False, "Gecko code must end at the end of a line")
+            return (True, "Gecko Code Validated!")
+        
+        print(validate_gecko_code(gecko_code)[1])
+        if not validate_gecko_code(gecko_code)[0]:
+            print("Please try again")
+            return
+
+        # Print out all inputs
+        print("\nPlease confirm the information provided is correct:")
+        print(f"Tag Name: {tag_name}")
+        print(f"Description: {desc}")
+        print(f"Community Name: {community_name}")
+        print(f"Tag Type: {tag_type}")
+        if tag_type == 'Gecko Code':
+            print(f"Gecko Code:\n{gecko_code}")
+            print(f"Gecko Code Description: {gecko_code_desc}")
+
+        # Prompt the user to confirm
+        confirmation = session.prompt("Confirm creation of the tag (y/n): ").lower()
+        if confirmation != 'y':
+            print("Tag creation aborted.")
+            return
+
+        web_functions.create_tag(RIOKEY, tag_name, desc, community_name, tag_type, gecko_code, gecko_code_desc)
 
     if user_input == 'printtags':
         print_tags()
     elif user_input == 'createtag':
-        print('Not yet available')
+        create_tag()
     elif user_input == 'updatetag':
         print('Not yet available')
     elif user_input == 'exit':
@@ -304,26 +385,3 @@ if __name__ == "__main__":
             break
         else:
             print("Invalid option. Please choose \nManage Community\nManage TagSet\nManage Tags")
-
-    
-    # create_community(community_data)
-    # check_sponsored_community("PJandFriends")
-    # invite_users_to_community("PJandFriends", ['MattGree'])
-    # print_community_members('PJandFriends')
-    # update_user_admin_status('PJandFriends', 'VicklessFalcon', make_admin=False)
-    # print_community_members('PJandFriends')
-    # print_community_tags('PJandFriends')
-    # print_all_tags(tag_types='Competition')
-    # get_tag_set_tags(59)
-    # get_tag_sets()
-    # create_tag_set("NNL Training",
-    #                "NNL Season 5 Spring Training mode for non-league scheduled games",
-    #                "League",
-    #                "PJandFriends",
-    #                [14, 22, 44, 4, 50, 66, 24],
-    #                1706497388,
-    #                1706600000,
-    #                59)
-    # delete_tag_set("NNL Training")
-    
-    #update_tag_set(61, new_end_date=1714971600)
