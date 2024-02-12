@@ -155,8 +155,7 @@ def manage_tagset():
                 raise ValidationError(message='Invalid date format. Use MM-DD-YYYY.')
             
     def tag_search_completion():
-        tags_list = web_functions.get_tags(RIOKEY, tag_types=['gecko_code', 'component'])
-        print(tags_list)
+        tags_list = web_functions.get_tags(RIOKEY, tag_types=['Gecko Code', 'Component'])
         tags_dict = {}
         tag_completer_list = []
         for tag in tags_list:
@@ -173,7 +172,7 @@ def manage_tagset():
             if continue_prompt == 'n':
                 break
 
-        return tags_list
+        return tag_input_list
         
     def create_tag_set():
         print("Welcome to the Tag Set Creation Tool!")
@@ -234,25 +233,57 @@ def manage_tagset():
         elif tag_set_id not in tagset_names_dict.values():
             print('Invalid Tag Input')
             return
-
-        new_name = prompt('Enter new name for the tag set (press Enter to skip): ')
-
-        new_desc = prompt('Enter new description for the tag set (press Enter to skip): ')
         
-        new_type = prompt('Enter the new type of the tag set (Season, League, Tournament): ', completer=tagset_type_completer)
+        for tag in tagset_list:
+            if (tag['id'] == tag_set_id):
+                current_tag_info = tag
+                break
 
-        # Prompt for start date with validation
+        # print(current_tag_info)
+
+        print(f'Current Name: {current_tag_info["name"]}')
+        new_name = prompt('Enter new name for the tag set (press Enter to skip): ')
+        print()
+
+        #print(f'Current Description: {current_tag_info["desc"]}')
+        new_desc = prompt('Enter new description for the tag set (press Enter to skip): ')
+        print()
+
+        print(f'Current Tag Type: {current_tag_info["type"]}')
+        new_type = prompt('Enter the new type of the tag set (Season, League, Tournament) (press Enter to skip): ', completer=tagset_type_completer, validator=OptionValidator(['Season', 'League', 'Tournament', '']))
+        print()
+
+        print(f'Current Start Date: {datetime.utcfromtimestamp(current_tag_info["start_date"]).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime("%Y-%m-%d %H:%M:%S")} EST')
         new_start_date = prompt('Enter new start date for the tag set (MM-DD-YYYY, press Enter to skip): ', validator=DateValidator())
         new_start_date = datetime.strptime(new_start_date, '%m-%d-%Y').timestamp() if new_start_date else None
+        print()
 
-        # Prompt for end date with validation
+        print(f'Current End Date: {datetime.utcfromtimestamp(current_tag_info["end_date"]).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime("%Y-%m-%d %H:%M:%S")} EST')
         new_end_date = prompt('Enter new end date for the tag set (MM-DD-YYYY, press Enter to skip): ', validator=DateValidator())
         new_end_date = datetime.strptime(new_end_date, '%m-%d-%Y').timestamp() if new_end_date else None
+        print()
 
-        new_tag_ids_input = prompt('Enter new tag IDs for the tag set (comma-separated, press Enter to skip): ')
-        new_tag_ids = [int(tag_id.strip()) for tag_id in new_tag_ids_input.split(',') if tag_id.strip()] if new_tag_ids_input else None
+        tagset_tags = web_functions.get_tag_set_tags(tag_set_id)
 
-        web_functions.update_tag_set(RIOKEY, tag_set_id, new_name, new_desc, new_type, new_start_date, new_end_date, new_tag_ids)
+        applied_tags = {}
+        for tag in tagset_tags[0]['tags']:
+            if tag['type'] in ['Gecko Code', 'Compettion']:
+                applied_tags[tag['name']] = tag['id']
+
+        print(f'Current Tags in Tagset:')
+        for tag, id in applied_tags.items():
+            print(f'Name: {tag}, ID: {id}')
+
+        tags_edit = prompt('Would you like to ADD to the current tags or START OVER? (press Enter to skip): ', completer=WordCompleter(['Add', 'Start Over'], ignore_case=True), validator=OptionValidator(['Add', 'Start Over', '']))
+
+        if tags_edit != '':
+            new_tags = tag_search_completion()
+            if tags_edit == 'Add':
+                new_tags.extend(applied_tags.values())
+        else:
+            new_tags = None
+
+        web_functions.update_tag_set(RIOKEY, tag_set_id, new_name, new_desc, new_type, new_start_date, new_end_date, new_tags)
 
     def print_tag_sets():
 
@@ -268,15 +299,15 @@ def manage_tagset():
         web_functions.delete_tag_set(RIOKEY, tag_set_name_input)
 
     def show_tag_set_tags():
-        tag_set_id = int(prompt('Enter the name or ID of the tag set to show the tags of: ', completer=tagset_names_completer))
+        tag_set_id = prompt('Enter the name or ID of the tag set to show the tags of: ', completer=tagset_names_completer)
 
         if tag_set_id in tagset_names_dict.keys():
-            tag_set_id =  tagset_names_dict[tag_set_id]
+            tag_set_id = tagset_names_dict[tag_set_id]
         elif tag_set_id not in tagset_names_dict.values():
             print('Invalid Tag Input')
             return
 
-        web_functions.get_tag_set_tags(tag_set_id)
+        web_functions.get_tag_set_tags(tag_set_id, print_option=True)
 
     if user_input == 'createtagset':
         create_tag_set()

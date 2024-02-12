@@ -253,7 +253,7 @@ def create_tag_set(name, desc, type, community_name, tags, start_date, end_date,
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def get_tag_set_tags(tag_set_id):
+def get_tag_set_tags(tag_set_id, print_option=False):
     """
     Get the tags from a specified tag set.
 
@@ -267,11 +267,13 @@ def get_tag_set_tags(tag_set_id):
     # Check the response
     if response.status_code == 200:
         tag_set_info = response.json().get('Tag Set', [])
-        if tag_set_info:
-            tags = tag_set_info[0].get('tags', [])
-            print(f"Tags from Tag Set {tag_set_id}: {tags}")
-        else:
-            print(f"No information found for Tag Set {tag_set_id}")
+        if print_option:
+            if tag_set_info:
+                tags = tag_set_info[0].get('tags', [])
+                print(f"Tags from Tag Set {tag_set_id}: {tags}")
+            else:
+                print(f"No information found for Tag Set {tag_set_id}")
+        return tag_set_info
     else:
         error_message = f"Failed to get tags from Tag Set {tag_set_id}. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
@@ -390,6 +392,7 @@ def update_tag_set(RIOKEY, tag_set_id, new_name=None, new_desc=None, new_type=No
         success_message = response.json()
         print(success_message)
     else:
+        print(f'Payload: {payload}')
         error_message = f"Failed to update tag set. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
 
