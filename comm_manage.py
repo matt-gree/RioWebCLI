@@ -27,6 +27,16 @@ class CommaSeparatedIntegersValidator(Validator):
                     integers = [int(part.strip()) for part in text.split(',')]
                 except ValueError:
                     raise ValidationError(message='Invalid input. Use comma-separated integers.')
+    
+class OptionValidator(Validator):
+    def __init__(self, options):
+        self.options = options
+
+    def validate(self, document):
+        text = document.text.strip()
+
+        if text not in self.options:
+            raise ValidationError(message=f'Valid options are: {", ".join(self.options)}')
 
 def manage_community():
     print()
@@ -52,11 +62,11 @@ def manage_community():
         community_type_completer = WordCompleter(['Official', 'Unofficial'], ignore_case=True)
         end_completer =  WordCompleter([], ignore_case=True)
 
-        community_name = session.prompt('Enter the name for your community: ')
-        community_type = session.prompt('Enter the type of community (Official, Unofficial): ', completer=community_type_completer)
-        is_private = session.prompt('Would you like the community to be private? (y/n): ', completer=end_completer)
-        global_link = session.prompt('Would you like a global join link for your community? (y/n): ')
-        description = session.prompt('Enter a description for your community: ')
+        community_name = prompt('Enter the name for your community: ')
+        community_type = prompt('Enter the type of community (Official, Unofficial): ', completer=community_type_completer, validator=OptionValidator(['Official', 'Unofficial']))
+        is_private = prompt('Would you like the community to be private? (y/n): ', validator=OptionValidator(['y','n']))
+        global_link = prompt('Would you like a global join link for your community? (y/n): ', validator=OptionValidator(['y','n']))
+        description = prompt('Enter a description for your community: ')
 
         # Display information for confirmation
         print("\nPlease review the information:")
@@ -67,7 +77,7 @@ def manage_community():
         print(f"Description: {description}")
 
         # Confirm submission
-        confirmation = session.prompt('Do you want to submit this information? (y/n): \n')
+        confirmation = prompt('Do you want to submit this information? (y/n): \n')
 
         if confirmation.lower() == 'y':
             web_functions.create_community(community_name, community_type, is_private, global_link, description, RIOKEY)
@@ -75,7 +85,7 @@ def manage_community():
             print("Community creation canceled.")
 
     def check_community_sponsor():
-        community_name = session.prompt('Enter the name of the community: ', completer=community_names_completer)
+        community_name = prompt('Enter the name of the community: ', completer=community_names_completer)
         print()
         web_functions.check_sponsored_community(community_name, RIOKEY)
 
@@ -86,12 +96,12 @@ def manage_community():
         print('Not yet functional')
 
     def display_community_members():
-        community_name = session.prompt('Enter the name of the community: ', completer=community_names_completer)
+        community_name = prompt('Enter the name of the community: ', completer=community_names_completer)
         print()
         web_functions.print_community_members(community_name, RIOKEY)
 
     def list_community_tags():
-        community_name = session.prompt('Enter the name of the community: ', completer=community_names_completer)
+        community_name = prompt('Enter the name of the community: ', completer=community_names_completer)
         print()
         web_functions.print_community_tags(community_name, RIOKEY)
 
@@ -118,11 +128,18 @@ def manage_tagset():
     session = PromptSession(history=history, auto_suggest=AutoSuggestFromHistory())
 
     community_manage_completer = WordCompleter(['Create Tag Set', 'Update Tag Set', 'Delete Tag Set', 'Print Tag Sets', 'Show TagSet Tags', 'Exit'], ignore_case=True)
-    user_input = session.prompt('What would you like to do?\nCreate Tag Set, Update Tag Set, Delete Tag Set, Print Tag Sets, Show TagSet Tags, \nSelection: ', completer=community_manage_completer)
+    user_input = prompt('What would you like to do?\nCreate Tag Set, Update Tag Set, Delete Tag Set, Print Tag Sets, Show TagSet Tags, \nSelection: ', completer=community_manage_completer)
 
     user_input = user_input.lower().replace(" ", "")
 
+    tagset_list = web_functions.get_tag_sets(RIOKEY)
+    tagset_names_dict= {}
+
+    for tagset in tagset_list:
+        tagset_names_dict[tagset['name']] = tagset['id']
     
+    tagset_names_completer = WordCompleter(tagset_names_dict.keys(), ignore_case=True)
+
     tagset_type_completer = WordCompleter(['Season', 'League', 'Tournament'], ignore_case=True)
 
     class DateValidator(Validator):
@@ -148,11 +165,11 @@ def manage_tagset():
 
         tag_input_list = []
         while True: 
-            tag_name_completer = session.prompt('Which tags would you like to add?\nInput: ', completer=WordCompleter(tag_completer_list, ignore_case=True))
+            tag_name_completer = prompt('Which tags would you like to add?\nInput: ', completer=WordCompleter(tag_completer_list, ignore_case=True))
             date_string = datetime.utcfromtimestamp(tags_dict[tag_name_completer]['date_created']).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')
             print(f'\nName: {tags_dict[tag_name_completer]["name"]}\nDescription: {tags_dict[tag_name_completer]["desc"]}\nTag ID: {tags_dict[tag_name_completer]["id"]}\nCommunity ID: {tags_dict[tag_name_completer]["comm_id"]}\nTag Type: {tags_dict[tag_name_completer]["type"]}\nDate Created: {date_string} EST\n')
             tag_input_list.append(tags_dict[tag_name_completer]["id"])
-            continue_prompt = session.prompt('Tag Added! Would you like to add another? (y/n): ')
+            continue_prompt = prompt('Tag Added! Would you like to add another? (y/n): ', validator=OptionValidator(['y','n']))
             if continue_prompt == 'n':
                 break
 
@@ -162,7 +179,7 @@ def manage_tagset():
         print("Welcome to the Tag Set Creation Tool!")
         name = prompt('Enter the name of the tag set: ')
         desc = prompt('Enter the description of the tag set: ')
-        type = prompt('Enter the type of the tag set (Season, League, Tournament): ', completer=tagset_type_completer)
+        type = prompt('Enter the type of the tag set (Season, League, Tournament): ', completer=tagset_type_completer, validator=OptionValidator(['Season', 'League', 'Tournament']))
         community_name = prompt('Enter the name of your community: ', completer=end_completer)
         
         # Prompt for tags (assuming comma-separated tag IDs)
@@ -201,7 +218,7 @@ def manage_tagset():
         print(f"End Date: {end_date_str}")
         print(f"Tag Set ID: {tag_set_id}")
 
-        confirmation = session.prompt('Do you want to submit this information? (y/n): \n')
+        confirmation = prompt('Do you want to submit this information? (y/n): \n')
 
         if confirmation.lower() == 'y':
              web_functions.create_tag_set(name, desc, type, community_name, tags, start_date, end_date, RIOKEY, tag_set_id)
@@ -209,7 +226,14 @@ def manage_tagset():
             print("Tagset creation canceled.")
 
     def update_tag_set():
-        tag_set_id = int(prompt('Enter the ID of the tag set to update: '))
+
+        tag_set_id = (prompt('Enter the ID or name of the tag set to update: ', completer=tagset_names_completer))
+
+        if tag_set_id in tagset_names_dict.keys():
+            tag_set_id =  tagset_names_dict[tag_set_id]
+        elif tag_set_id not in tagset_names_dict.values():
+            print('Invalid Tag Input')
+            return
 
         new_name = prompt('Enter new name for the tag set (press Enter to skip): ')
 
@@ -232,20 +256,25 @@ def manage_tagset():
 
     def print_tag_sets():
 
-        active_input = session.prompt('Would you like to search for active tag sets only? (y/n): ')
+        active_input = prompt('Would you like to search for active tag sets only? (y/n): ', validator=OptionValidator(['y','n']))
 
         community_ids_input = prompt('Enter community IDs to search from (comma-separated, press Enter to skip): ', validator=CommaSeparatedIntegersValidator())
         community_ids_list = [int(community_id.strip()) for community_id in community_ids_input.split(',') if community_id.strip()] if community_ids_input else None
 
-        web_functions.get_tag_sets(RIOKEY, active_only=active_input, communities=community_ids_list)
+        web_functions.get_tag_sets(RIOKEY, active_only=active_input, communities=community_ids_list, print_option=True)
 
     def delete_tag_set():
-        tag_set_name_input = session.prompt('Enter the name of the tagset: ')
-
+        tag_set_name_input = prompt('Enter the name of the tagset: ', completer=tagset_names_completer)
         web_functions.delete_tag_set(RIOKEY, tag_set_name_input)
 
     def show_tag_set_tags():
-        tag_set_id = int(prompt('Enter the ID of the tag set to show the tags of: '))
+        tag_set_id = int(prompt('Enter the name or ID of the tag set to show the tags of: ', completer=tagset_names_completer))
+
+        if tag_set_id in tagset_names_dict.keys():
+            tag_set_id =  tagset_names_dict[tag_set_id]
+        elif tag_set_id not in tagset_names_dict.values():
+            print('Invalid Tag Input')
+            return
 
         web_functions.get_tag_set_tags(tag_set_id)
 
@@ -265,7 +294,7 @@ def manage_tagset():
         print("Invalid option. Please choose \nCreate Tag Set, Update Tag Set, Delete Tag Set, Print Tag Sets, Show Tag Set Tags")
     
 def manage_tags():
-    user_input = session.prompt('What would you like to do?\nPrint Tags, Create Tag, Update Tag: ')
+    user_input = prompt('What would you like to do?\nPrint Tags, Create Tag, Update Tag: ')
     user_input = user_input.lower().replace(" ", "")
 
     tag_type_completer = WordCompleter(["Component", "Competition", "Community", "Gecko Code"], ignore_case=True)
@@ -283,9 +312,9 @@ def manage_tags():
         web_functions.get_tags(RIOKEY, tag_types=tag_types_list, community_ids=community_ids_list, print_option=True)
 
     def create_tag():
-        tag_name = session.prompt('Enter a name for the new tag: ')
-        desc = session.prompt('Enter a description for the new tag: ')
-        community_name = session.prompt('Enter the community name where the new tag will be created: ')
+        tag_name = prompt('Enter a name for the new tag: ')
+        desc = prompt('Enter a description for the new tag: ')
+        community_name = prompt('Enter the community name where the new tag will be created: ')
         tag_type = prompt('Enter tag type (Component, Gecko Code): ', completer=tag_type_create_completer)
 
         if tag_type == 'Gecko Code':
@@ -333,7 +362,7 @@ def manage_tags():
             print(f"Gecko Code Description: {gecko_code_desc}")
 
         # Prompt the user to confirm
-        confirmation = session.prompt("Confirm creation of the tag (y/n): ").lower()
+        confirmation = prompt("Confirm creation of the tag (y/n): ").lower()
         if confirmation != 'y':
             print("Tag creation aborted.")
             return
@@ -378,7 +407,7 @@ if __name__ == "__main__":
 
     while True:
         initial_completer = WordCompleter(['Community', 'Tagset', 'Tags', 'Exit'], ignore_case=True)
-        user_input = session.prompt('\nChoose what to manage:\nCommunity, TagSet, Tags\nManage: ', completer=initial_completer)
+        user_input = prompt('\nChoose what to manage:\nCommunity, TagSet, Tags\nManage: ', completer=initial_completer)
 
         user_input = user_input.lower().strip()
         

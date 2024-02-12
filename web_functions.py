@@ -277,7 +277,7 @@ def get_tag_set_tags(tag_set_id):
         print(f"Error: {error_message}\nDetails: {response.text}")
 
 
-def get_tag_sets(RIOKEY, active_only='n', communities=None):
+def get_tag_sets(RIOKEY, active_only='n', communities=None, print_option=False):
     """
     Get information about all tag sets.
 
@@ -294,7 +294,7 @@ def get_tag_sets(RIOKEY, active_only='n', communities=None):
     # Prepare the payload
     payload = {
         'Active': active_only,
-        #'Rio Key': RIOKEY
+        'rio_key': RIOKEY
     }
 
     if communities is not None:
@@ -306,15 +306,17 @@ def get_tag_sets(RIOKEY, active_only='n', communities=None):
     # Check the response
     if response.status_code == 200:
         tag_sets_info = response.json().get('Tag Sets', [])
-        if tag_sets_info:
-            print("Tag Sets:")
-            for tag_set_info in tag_sets_info:
-                tag_set_id = tag_set_info.get('id')
-                tag_set_name = tag_set_info.get('name')
-                tag_set_type = tag_set_info.get('type')
-                print(f"Tag Set ID: {tag_set_id}, Name: {tag_set_name}, Type: {tag_set_type}")
-        else:
-            print("No tag sets found.")
+        if print_option:
+            if tag_sets_info:
+                print("Tag Sets:")
+                for tag_set_info in tag_sets_info:
+                    tag_set_id = tag_set_info.get('id')
+                    tag_set_name = tag_set_info.get('name')
+                    tag_set_type = tag_set_info.get('type')
+                    print(f"Tag Set ID: {tag_set_id}, Name: {tag_set_name}, Type: {tag_set_type}")
+            else:
+                print("No tag sets found.")
+        return tag_sets_info
     else:
         error_message = f"Failed to get tag sets. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
