@@ -164,7 +164,7 @@ def manage_tagset():
 
         tag_input_list = []
         while True: 
-            tag_name_completer = prompt('Which tags would you like to add?\nInput: ', completer=WordCompleter(tag_completer_list, ignore_case=True))
+            tag_name_completer = prompt('\nWhich tags would you like to add? (Search by name)\nInput: ', completer=WordCompleter(tag_completer_list, ignore_case=True))
             date_string = datetime.utcfromtimestamp(tags_dict[tag_name_completer]['date_created']).replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-5))).strftime('%Y-%m-%d %H:%M:%S')
             print(f'\nName: {tags_dict[tag_name_completer]["name"]}\nDescription: {tags_dict[tag_name_completer]["desc"]}\nTag ID: {tags_dict[tag_name_completer]["id"]}\nCommunity ID: {tags_dict[tag_name_completer]["comm_id"]}\nTag Type: {tags_dict[tag_name_completer]["type"]}\nDate Created: {date_string} EST\n')
             tag_input_list.append(tags_dict[tag_name_completer]["id"])
@@ -239,9 +239,8 @@ def manage_tagset():
                 current_tag_info = tag
                 break
 
-        # print(current_tag_info)
 
-        print(f'Current Name: {current_tag_info["name"]}')
+        print(f'\nCurrent Name: {current_tag_info["name"]}')
         new_name = prompt('Enter new name for the tag set (press Enter to skip): ')
         print()
 
@@ -263,10 +262,8 @@ def manage_tagset():
         new_end_date = datetime.strptime(new_end_date, '%m-%d-%Y').timestamp() if new_end_date else None
         print()
 
-        tagset_tags = web_functions.get_tag_set_tags(tag_set_id)
-
         applied_tags = {}
-        for tag in tagset_tags[0]['tags']:
+        for tag in current_tag_info['tags']:
             if tag['type'] in ['Gecko Code', 'Compettion']:
                 applied_tags[tag['name']] = tag['id']
 
@@ -274,7 +271,7 @@ def manage_tagset():
         for tag, id in applied_tags.items():
             print(f'Name: {tag}, ID: {id}')
 
-        tags_edit = prompt('Would you like to ADD to the current tags or START OVER? (press Enter to skip): ', completer=WordCompleter(['Add', 'Start Over'], ignore_case=True), validator=OptionValidator(['Add', 'Start Over', '']))
+        tags_edit = prompt('\nWould you like to ADD to the current tags or START OVER? (press Enter to skip): ', completer=WordCompleter(['Add', 'Start Over'], ignore_case=True), validator=OptionValidator(['Add', 'Start Over', '']))
 
         if tags_edit != '':
             new_tags = tag_search_completion()
@@ -282,6 +279,8 @@ def manage_tagset():
                 new_tags.extend(applied_tags.values())
         else:
             new_tags = None
+
+        
 
         web_functions.update_tag_set(RIOKEY, tag_set_id, new_name, new_desc, new_type, new_start_date, new_end_date, new_tags)
 
