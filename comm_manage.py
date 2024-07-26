@@ -471,13 +471,7 @@ def manage_ban_user():
         return
     else:
         print("Invalid option. Please choose Create Community, Check Community Sponsor, Invite Users to Community, Update Community Admins, Display Community Members, List Community Tags")
-        
-
-
-
-
-    print(formatted_text)
-
+    
 
 if __name__ == "__main__":
     if os.path.exists('rio_key.json'):
@@ -509,7 +503,6 @@ if __name__ == "__main__":
         user_input = prompt('\nChoose what to manage:\nCommunity, TagSet, Tags, BAN USER\nManage: ', completer=initial_completer)
 
         user_input = user_input.lower().strip()
-        print(user_input)
         
         if user_input == 'community':
             manage_community()
