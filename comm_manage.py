@@ -410,6 +410,75 @@ def manage_tags():
     else:
         print("Invalid option. Please choose \nCreate Tag Set, Update Tag Set, Delete Tag Set, Print Tag Sets, Show Tag Set Tags")
 
+def manage_ban_user():
+    formatted_text = '''
+                    )          (         (     
+    (     (      ( /(          )\ )      )\ )  
+    ( )\    )\     )\())     (  (()/( (   (()/(  
+    )((_)((((_)(  ((_)\      )\  /(_)))\   /(_)) 
+    ((_)_  )\ _ )\  _((_)  _ ((_)(_)) ((_) (_))   
+    | _ ) (_)_\(_)| \| | | | | |/ __|| __|| _ \  
+    | _ \  / _ \  | .` | | |_| |\__ \| _| |   /  
+    |___/ /_/ \_\ |_|\_|  \___/ |___/|___||_|_\ 
+    
+    '''
+
+    print(formatted_text)
+
+    def ban_user():
+        user_to_ban = prompt('Enter the username of the player to ban: ')
+
+        # Display information for confirmation
+        print("\nPlease review the information:")
+        print(f"The following user will be banned: {user_to_ban}")
+
+        # Confirm submission
+        confirmation = prompt('\nDo you want to submit this information? (y/n): ')
+
+        if confirmation.lower() == 'y':
+            web_functions.ban_user(RIOKEY, user_to_ban)
+        else:
+            print("User ban cancelled")
+
+
+    def unban_user():
+        user_to_ban = prompt('Enter the username of the player to unban:')
+        print()
+
+        # Display information for confirmation
+        print("\nPlease review the information:")
+        print(f"The following user will be unbanned: {user_to_ban}")
+
+        # Confirm submission
+        confirmation = prompt('\n Do you want to submit this information? (y/n): ')
+
+        if confirmation.lower() == 'y':
+            web_functions.unban_user(RIOKEY, user_to_ban)
+        else:
+            print("User unban cancelled")
+
+    ban_user_completer = WordCompleter(['Ban User', 'Unban User', 'Exit'], ignore_case=True)
+    user_input = session.prompt('What would you like to do?\nBan User, Unban User: ', completer=ban_user_completer)
+    end_completer =  WordCompleter([], ignore_case=True)
+
+    user_input = user_input.lower().replace(" ", "")
+
+    if user_input == 'banuser':
+        ban_user()
+    elif user_input == 'unbanuser':
+        unban_user()
+    elif user_input == 'exit':
+        return
+    else:
+        print("Invalid option. Please choose Create Community, Check Community Sponsor, Invite Users to Community, Update Community Admins, Display Community Members, List Community Tags")
+        
+
+
+
+
+    print(formatted_text)
+
+
 if __name__ == "__main__":
     if os.path.exists('rio_key.json'):
         with open('rio_key.json', "r") as config_file:
@@ -431,15 +500,16 @@ if __name__ == "__main__":
     \\_| \\_|_|\\___/   \\/  \\/ \\___|_.__/   \\____/\\___/|_| |_| |_|_| |_||_|  \\_|  |_|\\__,_|_| |_|\\__,_|\\__, |\\___|_|   
                                                                                                     __/  |          
                                                                                                     |___/           
-'''
+    '''
 
     print(formatted_text)
 
     while True:
-        initial_completer = WordCompleter(['Community', 'Tagset', 'Tags', 'Exit'], ignore_case=True)
-        user_input = prompt('\nChoose what to manage:\nCommunity, TagSet, Tags\nManage: ', completer=initial_completer)
+        initial_completer = WordCompleter(['Community', 'Tagset', 'Tags', 'BAN USER', 'Exit'], ignore_case=True)
+        user_input = prompt('\nChoose what to manage:\nCommunity, TagSet, Tags, BAN USER\nManage: ', completer=initial_completer)
 
         user_input = user_input.lower().strip()
+        print(user_input)
         
         if user_input == 'community':
             manage_community()
@@ -447,6 +517,8 @@ if __name__ == "__main__":
             manage_tagset()
         elif user_input == 'tags':
             manage_tags()
+        elif user_input == 'ban user':
+            manage_ban_user()
         elif user_input == 'exit':
             break
         else:

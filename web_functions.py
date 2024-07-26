@@ -423,6 +423,40 @@ def create_tag(RIOKEY, tag_name, desc, community_name, tag_type, gecko_code=None
         error_message = f"Failed to create tag set. Status code: {response.status_code}"
         print(f"Error: {error_message}\nDetails: {response.text}")
 
+def ban_user(RIOKEY, username_to_ban):
+    payload = {
+        'Rio Key': RIOKEY,
+        'group_name': 'Banned',
+        'username': username_to_ban,
+    }
+
+    response = requests.post('https://api.projectrio.app/user_group/add_user', json=payload)
+
+    # Check the response
+    if response.status_code == 200:
+        success_message = response.json()
+        print(success_message)
+    else:
+        error_message = f"Failed to create tag set. Status code: {response.status_code}"
+        print(f"Error: {error_message}\nDetails: {response.text}")
+
+def unban_user(RIOKEY, username_to_unban):
+    payload = {
+        'Rio Key': RIOKEY,
+        'group_name': 'Banned',
+        'username': username_to_unban,
+    }
+
+    response = requests.post('https://api.projectrio.app/user_group/remove_user', json=payload)
+
+    # Check the response
+    if response.status_code == 200:
+        success_message = response.json()
+        print(success_message)
+    else:
+        error_message = f"Failed to create tag set. Status code: {response.status_code}"
+        print(f"Error: {error_message}\nDetails: {response.text}")
+
 
 if __name__ == "__main__":
     if os.path.exists('rio_key.json'):
