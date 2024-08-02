@@ -5,8 +5,6 @@ from prompt_toolkit.completion import WordCompleter
 from APIManager import APIManager
 from CompleterCache import CompleterCache
 
-from endpoint_inputs import community_endpoints, supported_endpoints
-
 manager = APIManager()
 cache = CompleterCache(manager)
 
@@ -87,45 +85,3 @@ api_inputs = {
         }
     },   
 }
-
-
-community_endpoints_prompt = {
-    'prompt': 'What would you like to do: ',
-    'completer': supported_endpoints,
-    'validator': OptionValidator(supported_endpoints)
-}
-
-def get_prompt_input(prompt_dictionary):
-    completer = WordCompleter(prompt_dictionary.get('completer', []), ignore_case=True)
-    input = prompt(prompt_dictionary['prompt'], completer=completer, validator=prompt_dictionary.get('validator'), bottom_toolbar=prompt_dictionary.get('toolbar'))
-    return input
-
-
-def run_prompt(prompt_dictionary):
-    if prompt_dictionary.get('loop'):
-        input = []
-        while True:
-            add_item = get_prompt_input(prompt_dictionary)
-            if add_item == 'q':
-                break
-            input.append(add_item)
-        return input
-
-    return get_prompt_input(prompt_dictionary)        
-
-function_args = {}
-
-user_endpoint_choice = run_prompt(community_endpoints_prompt)
-for key in community_endpoints[user_endpoint_choice]['inputs']:
-    build_prompt = api_inputs[key]
-    input = run_prompt(build_prompt)
-
-    if build_prompt.get('subprompt'):
-        input = run_prompt(build_prompt[input])
-    
-    print(input)
-
-    function_args[key] = input
-    
-function_args['api_manager'] = manager
-community_endpoints[user_endpoint_choice]['func'](**function_args)
