@@ -2,10 +2,13 @@ from prompt_toolkit import prompt
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit.completion import WordCompleter
 
+from functools import partial
+
 from APIManager import APIManager
 from CompleterCache import CompleterCache
 
-from endpoint_inputs import community_endpoints, supported_endpoints
+from comm_manager_functions import community_endpoints, supported_endpoints
+
 
 manager = APIManager()
 cache = CompleterCache(manager)
@@ -37,6 +40,43 @@ def create_list_from_txt(txt_path):
         return []
     
 
+def yes_to_1_converter(y_or_n):
+    conversion_dict = {
+        'y': 1,
+        'n': 0
+    }
+
+    return conversion_dict[y_or_n]
+
+def yes_no_to_t_f(y_or_n):
+    conversion_dict = {
+        'y': True,
+        'n': False
+    }
+
+    return conversion_dict[y_or_n]
+
+
+def community_manager_converter(user, ban=None, remove=None, key=None, admin=None):
+    user_action_dict = {}
+    action_values  = [True, False]
+    user_action_dict['username'] = user
+
+    if ban in action_values:
+        user_action_dict['ban'] = ban
+
+    if remove in action_values:
+        user_action_dict['remove'] = remove
+
+    if key in action_values:
+        user_action_dict['key'] = key
+    
+    if admin in action_values:
+        user_action_dict['admin'] = admin
+
+    return user_action_dict
+
+
 api_inputs = {
     'community_name_free': {
         'prompt': 'Enter the name for your community: '
@@ -53,11 +93,13 @@ api_inputs = {
     },
     'private': {
         'prompt': 'Would you like the community to be private? (y/n):  ',
-        'validator': OptionValidator(['y', 'n'])
+        'validator': OptionValidator(['y', 'n']),
+        'input_processing': yes_to_1_converter
     },
     'global_link': {
         'prompt': 'Would you like a global join link for your community? (y/n): ',
-        'validator': OptionValidator(['y', 'n'])
+        'validator': OptionValidator(['y', 'n']),
+        'input_processing': yes_to_1_converter
     },
     'comm_desc': {
         'prompt': 'Enter a description for your community: '
@@ -85,7 +127,98 @@ api_inputs = {
             'prompt': 'Enter the path to the comma seperated username .txt file: ',
             'input_processing': create_list_from_txt
         }
-    },   
+    },
+    'community_manage_bans': {
+        'prompt': 'Would you like to ban or unban members?: ',
+        'completer': ['ban', 'unban'],
+        'validator': OptionValidator(['ban', 'unban']),
+        'subprompt': True,
+        'ban': {
+            'loop': True,
+            'prompt': 'Enter the Rio username to ban (q to finish): ',
+            'completer': cache.users() +['q'],
+            'validator': OptionValidator(cache.users() +['q']),
+            'input_processing': partial(community_manager_converter, ban=True)
+        },
+        'unban': {
+            'loop': True,
+            'prompt': 'Enter the Rio username to unban (q to finish): ',
+            'completer': cache.users() +['q'],
+            'validator': OptionValidator(cache.users() +['q']),
+            'input_processing': partial(community_manager_converter, ban=False)
+        },
+        'rename_arg': 'user_list'
+    },
+    'community_remove_users': {
+        'loop': True,
+        'prompt': 'Enter the Rio username to remove (q to finish): ',
+        'completer': cache.users() +['q'],
+        'validator': OptionValidator(cache.users() +['q']),
+        'input_processing': partial(community_manager_converter, remove=True)
+    },
+    'manage_user_community_keys': {
+        'prompt': 'Would you like to create or delete member keys?: ',
+        'completer': ['create', 'delete'],
+        'validator': OptionValidator(['create', 'delete']),
+        'subprompt': True,
+        'create': {
+            'loop': True,
+            'prompt': 'Enter the Rio username to create a key for (q to finish): ',
+            'completer': cache.users() +['q'],
+            'validator': OptionValidator(cache.users() +['q']),
+            'input_processing': partial(community_manager_converter, key=True)
+        },
+        'delete': {
+            'loop': True,
+            'prompt': 'Enter the Rio username to delete a key for (q to finish): ',
+            'completer': cache.users() +['q'],
+            'validator': OptionValidator(cache.users() +['q']),
+            'input_processing': partial(community_manager_converter, key=False)
+        },
+        'rename_arg': 'user_list'
+    },
+    'manage_community_admins': {
+        'prompt': 'Would you like to add or remove community admins?: ',
+        'completer': ['add', 'remove'],
+        'validator': OptionValidator(['add', 'remove']),
+        'subprompt': True,
+        'add': {
+            'loop': True,
+            'prompt': 'Enter the Rio username to make an admin (q to finish): ',
+            'completer': cache.users() +['q'],
+            'validator': OptionValidator(cache.users() +['q']),
+            'input_processing': partial(community_manager_converter, admin=True)
+        },
+        'remove': {
+            'loop': True,
+            'prompt': 'Enter the Rio username to remove as admin (q to finish): ',
+            'completer': cache.users() +['q'],
+            'validator': OptionValidator(cache.users() +['q']),
+            'input_processing': partial(community_manager_converter, admin=False)
+        },
+        'rename_arg': 'user_list'
+    },
+    'key_action': {
+        'prompt': 'What action would you like to take (generate, revoke, generate_all): ',
+        'completer': ['generate', 'revoke', 'generate_all'],
+        'validator': OptionValidator(['generate', 'revoke', 'generate_all']),
+    },
+    'tag_name_free': {
+        'prompt': 'Enter the name for your tag: '
+    },
+    'tag_desc': {
+        'prompt': 'Enter a description for your new tag: '
+    },
+    'tag_type': {
+        'prompt': 'Enter the tag type (Component, Client Code, Gecko Code): ',
+        'completer': ['Component', 'Client Code', 'Gecko Code'],
+        'validator': OptionValidator(['Component', 'Client Code', 'Gecko Code']),
+    },
+    'gecko_code': {
+        'prompt': 'Enter the gecko code: ',
+        'validator': OptionValidator(['Component', 'Client Code', 'Gecko Code']),
+    }
+
 }
 
 
@@ -95,17 +228,21 @@ community_endpoints_prompt = {
     'validator': OptionValidator(supported_endpoints)
 }
 
-def get_prompt_input(prompt_dictionary):
+def get_prompt_input(prompt_dictionary, break_key='q'):
     completer = WordCompleter(prompt_dictionary.get('completer', []), ignore_case=True)
     input = prompt(prompt_dictionary['prompt'], completer=completer, validator=prompt_dictionary.get('validator'), bottom_toolbar=prompt_dictionary.get('toolbar'))
-    return input
+    if input == break_key:
+        return break_key
+    if prompt_dictionary.get('input_processing'):
+        input = prompt_dictionary['input_processing'](input)
 
+    return input
 
 def run_prompt(prompt_dictionary):
     if prompt_dictionary.get('loop'):
         input = []
         while True:
-            add_item = get_prompt_input(prompt_dictionary)
+            add_item = get_prompt_input(prompt_dictionary,)
             if add_item == 'q':
                 break
             input.append(add_item)
@@ -122,10 +259,17 @@ for key in community_endpoints[user_endpoint_choice]['inputs']:
 
     if build_prompt.get('subprompt'):
         input = run_prompt(build_prompt[input])
-    
-    print(input)
 
-    function_args[key] = input
+    arg_name = key
+    if build_prompt.get('rename_arg'):
+        arg_name = build_prompt['rename_arg']
+
+    function_args[arg_name] = input
     
 function_args['api_manager'] = manager
-community_endpoints[user_endpoint_choice]['func'](**function_args)
+if community_endpoints[user_endpoint_choice].get('fixed_inputs'):
+    function_args = function_args | community_endpoints[user_endpoint_choice]['fixed_inputs']
+
+output = community_endpoints[user_endpoint_choice]['func'](**function_args)
+if community_endpoints[user_endpoint_choice].get('parse_data'):
+    print(community_endpoints[user_endpoint_choice]['parse_data'](cache, output))
