@@ -232,7 +232,7 @@ def create_tag_set(name, desc, type, community_name, tags, start_date, end_date,
         'desc': desc,
         'type': type,
         'community_name': community_name,
-        'tags': tags,
+        'add_tag_ids': tags,
         'start_date': start_date,
         'end_date': end_date,
         'rio_key': RIOKEY
@@ -382,7 +382,7 @@ def update_tag_set(RIOKEY, tag_set_id, new_name=None, new_desc=None, new_type=No
     if new_end_date:
         payload['end_date'] = new_end_date
     if new_tag_ids:
-        payload['tag_ids'] = new_tag_ids
+        payload['add_tag_ids'] = new_tag_ids
 
     # Make the API request
     response = requests.post('https://api.projectrio.app/tag_set/update', json=payload)
