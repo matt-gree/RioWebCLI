@@ -1,5 +1,6 @@
 import web_functions as web_func
 import data_parsing
+from functools import partial
 
 community_endpoints = {
     'Create Community': {
@@ -83,13 +84,72 @@ community_endpoints = {
         },
         'parse_data': data_parsing.print_community_sponsor
     },
-    'Manage Community User Keys': {
+    'Community-Wide User Keys': {
         'func': web_func.community_key,
         'inputs': [
             'community_name_closed',
             'key_action'
         ],
         'parse_data': data_parsing.community_user_keys_to_dataframe
+    },
+    'Create Component Tag': {
+        'func': partial(web_func.create_tag, tag_type='Component'),
+        'inputs': [
+            'community_name_closed',
+            'tag_name_free',
+            'tag_desc'
+        ]
+    },
+    'Create Gecko Code Tag': {
+        'func': partial(web_func.create_tag, tag_type='Gecko Code'),
+        'inputs': [
+            'community_name_closed',
+            'tag_name_free',
+            'tag_desc',
+            'gecko_code',
+            'gecko_code_desc'
+        ]
+    },
+    'Create Game Mode': {
+        'func': web_func.create_game_mode,
+        'inputs': [
+            'game_mode_name_free',
+            'game_mode_desc',
+            'game_mode_type',
+            'community_name_closed',
+            'start_date',
+            'end_date',
+            'add_tag_ids',
+            'game_mode_to_mirror_tags_from'
+        ]
+    },
+    'Add Tags to Game Mode': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'add_tag_ids'
+        ]
+    },
+    'Remove Tags from Game Mode': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'remove_tag_ids'
+        ]
+    },
+    'Update Game Mode End Date': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'end_date'
+        ]
+    },
+    'Update Game Mode Start Date': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'start_date'
+        ]
     }
 }
 

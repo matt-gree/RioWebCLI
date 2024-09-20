@@ -1,6 +1,10 @@
 from prompt_toolkit import prompt
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit.completion import WordCompleter
+import string
+
+from datetime import datetime
+import pytz
 
 from functools import partial
 
@@ -24,7 +28,54 @@ class OptionValidator(Validator):
         if text not in self.options:
             raise ValidationError(message=f'Valid options are: {", ".join(self.options)}')
         
-            
+
+class GeckoCodeValidator(Validator):
+    def validate(self, document):
+        in_str = document.text
+        index = 0
+        
+        for char in in_str:
+            if index == 17:
+                if char != '\n':
+                    raise ValidationError(
+                        message="Invalid Gecko Code: Each line of 17 characters must be separated by a newline",
+                        cursor_position=index
+                    )
+                index = 0
+            elif index == 8:
+                if char != ' ':
+                    raise ValidationError(
+                        message="Invalid Gecko Code: There must be a space between memory address and value",
+                        cursor_position=index
+                    )
+                index += 1
+            elif index <= 16:
+                if char not in string.hexdigits:
+                    raise ValidationError(
+                        message="Invalid Gecko Code: Gecko code must be made of hex values only",
+                        cursor_position=index
+                    )
+                index += 1
+        
+        # After the loop, check if we ended in the middle of a line
+        if index != 0: 
+            raise ValidationError(
+                message="Invalid Gecko Code: Gecko code must end at the end of a line",
+                cursor_position=len(in_str)
+            )
+        
+class DateValidator(Validator):
+    def validate(self, document):
+        text = document.text
+
+        if text == '':
+            return
+
+        try:
+            datetime.strptime(text, '%m-%d-%Y')
+        except ValueError as e:
+            raise ValidationError(message='Invalid date format. Use MM-DD-YYYY.') from e
+
 def create_list_from_txt(txt_path):
     try:
         with open(txt_path, 'r') as file:
@@ -38,7 +89,6 @@ def create_list_from_txt(txt_path):
     except Exception as e:
         print(f"An error occurred: {e}")
         return []
-    
 
 def yes_to_1_converter(y_or_n):
     conversion_dict = {
@@ -56,6 +106,8 @@ def yes_no_to_t_f(y_or_n):
 
     return conversion_dict[y_or_n]
 
+def dictionary_conversion(key, dictionary):
+    return dictionary[key]
 
 def community_manager_converter(user, ban=None, remove=None, key=None, admin=None):
     user_action_dict = {}
@@ -76,6 +128,18 @@ def community_manager_converter(user, ban=None, remove=None, key=None, admin=Non
 
     return user_action_dict
 
+def date_processing(date_string, eod=False):
+    # Define the EST timezone
+    est = pytz.timezone('America/New_York')
+    
+    # Parse the date string and set time to 11:59:59 PM
+    naive_datetime = datetime.strptime(date_string, '%m-%d-%Y')
+    est_datetime = est.localize(naive_datetime)
+    if eod:
+        est_datetime = est.localize(naive_datetime.replace(hour=23, minute=59, second=59))
+    
+    # Return the timestamp
+    return int(est_datetime.timestamp())
 
 api_inputs = {
     'community_name_free': {
@@ -154,7 +218,8 @@ api_inputs = {
         'prompt': 'Enter the Rio username to remove (q to finish): ',
         'completer': cache.users() +['q'],
         'validator': OptionValidator(cache.users() +['q']),
-        'input_processing': partial(community_manager_converter, remove=True)
+        'input_processing': partial(community_manager_converter, remove=True),
+        'rename_arg': 'user_list'
     },
     'manage_user_community_keys': {
         'prompt': 'Would you like to create or delete member keys?: ',
@@ -209,14 +274,59 @@ api_inputs = {
     'tag_desc': {
         'prompt': 'Enter a description for your new tag: '
     },
-    'tag_type': {
-        'prompt': 'Enter the tag type (Component, Client Code, Gecko Code): ',
-        'completer': ['Component', 'Client Code', 'Gecko Code'],
-        'validator': OptionValidator(['Component', 'Client Code', 'Gecko Code']),
-    },
     'gecko_code': {
         'prompt': 'Enter the gecko code: ',
-        'validator': OptionValidator(['Component', 'Client Code', 'Gecko Code']),
+        'validator': GeckoCodeValidator(),
+    },
+    'gecko_code_desc':{
+        'prompt': 'Enter a description for your new tag: '
+    },
+    'game_mode_name_free': {
+        'prompt': 'Enter the name for your game mode: '
+    },
+    'game_mode_desc': {
+        'prompt': 'Enter a description for your community: '
+    },
+    'game_mode_type': {
+        'prompt': 'Enter the game mode type (Season, League, Tournament): ',
+        'completer': ['Season', 'League', 'Tournament'],
+        'validator': OptionValidator(['Season', 'League', 'Tournament'])
+    },
+    'start_date': {
+        'prompt': 'Enter the start date (MM-DD-YYYY): ',
+        'validator': DateValidator(),
+        'input_processing': date_processing
+    },
+    'end_date': {
+        'prompt': 'Enter the end date (EOD) (MM-DD-YYYY): ',
+        'validator': DateValidator(),
+        'input_processing': partial(date_processing, eod=True)
+    },
+    'add_tag_ids': {
+        'loop': True,
+        'prompt': 'Enter the tags to add to this community (optional): ',
+        'completer': list(cache.tags_dictionary().keys()) + ['q'],
+        'validator': OptionValidator(list(cache.tags_dictionary().keys()) + ['q']),
+        'input_processing': partial(dictionary_conversion, dictionary=cache.tags_dictionary())
+    },
+    'remove_tag_ids': {
+        'loop': True,
+        'prompt': 'Enter the tags to add to remove from this community (optional): ',
+        'completer': list(cache.tags_dictionary().keys()) + ['q'],
+        'validator': OptionValidator(list(cache.tags_dictionary().keys()) + ['q']),
+        'input_processing': partial(dictionary_conversion, dictionary=cache.tags_dictionary())
+    },
+    'game_mode_to_mirror_tags_from': {
+        'prompt': 'Enter the game mode to mirror tags from in this new game mode (enter to skip): ',
+        'completer': list(cache.game_mode_dictionary().keys()) + [''],
+        'validator': OptionValidator(list(cache.game_mode_dictionary().keys()) + ['']),
+        'input_processing': partial(dictionary_conversion, dictionary=cache.game_mode_dictionary())
+    },
+    'tag_set_id': {
+        'prompt': 'Enter the name of the game mode: ',
+        'completer': list(cache.game_mode_dictionary().keys()) + [''],
+        'validator': OptionValidator(list(cache.game_mode_dictionary().keys()) + ['']),
+        'input_processing': partial(dictionary_conversion, dictionary=cache.game_mode_dictionary())
     }
 
 }

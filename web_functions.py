@@ -5,7 +5,7 @@ with open('rio_key.json', "r") as config_file:
     global RIO_KEY
     RIO_KEY = json.load(config_file)['rio_key']
 
-debug_mode = False
+debug_mode = True
 
 ### example of including the decorator. I'd also like to think that you could streamline the params part too but I didn't have anything come to mind right now
 @include_rio_key(RIO_KEY)
@@ -235,6 +235,83 @@ def list_tags(api_manager: APIManager, tag_types=None, community_ids=None, data=
         data['community_ids'] = community_ids
 
     # Make the API request
+    return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
+@include_rio_key(RIO_KEY)
+def create_game_mode(api_manager: APIManager, game_mode_name_free, game_mode_desc, game_mode_type, community_name_closed, start_date, end_date, add_tag_ids=None, game_mode_to_mirror_tags_from=None, data=None):
+    
+    ENDPOINT = "/tag_set/create"
+
+    if data is None:
+        data = {}
+
+    data.update({
+        'name': game_mode_name_free,
+        'desc': game_mode_desc,
+        'type': game_mode_type,
+        'community_name': community_name_closed,
+        'start_date': start_date,
+        'end_date': end_date,
+    })
+
+    if add_tag_ids:
+        data['add_tag_ids'] = add_tag_ids
+
+    if game_mode_to_mirror_tags_from:
+        data['tag_set_id'] = game_mode_to_mirror_tags_from
+
+    if debug_mode:
+        print(data)
+
+    return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
+@include_rio_key(RIO_KEY)
+def update_game_mode(api_manager: APIManager, tag_set_id, game_mode_name_free=None, game_mode_desc=None, game_mode_type=None, start_date=None, end_date=None, add_tag_ids=None, remove_tag_ids=None, data=None):
+    
+    ENDPOINT = "/tag_set/update"
+
+    if data is None:
+        data = {}
+
+    data.update({
+        'tag_set_id': tag_set_id
+    })
+
+    # Add arguments to data dict if they are not None
+    if game_mode_name_free is not None:
+        data['game_mode_name_free'] = game_mode_name_free
+    if game_mode_desc is not None:
+        data['game_mode_desc'] = game_mode_desc
+    if game_mode_type is not None:
+        data['game_mode_type'] = game_mode_type
+    if start_date is not None:
+        data['start_date'] = start_date
+    if end_date is not None:
+        data['end_date'] = end_date
+    if add_tag_ids is not None:
+        data['add_tag_ids'] = add_tag_ids
+    if remove_tag_ids is not None:
+        data['remove_tag_ids'] = remove_tag_ids
+
+    if debug_mode:
+        print(data)
+
+    return api_manager.send_request(ENDPOINT, method='POST', data=data)
+    
+@include_rio_key(RIO_KEY)    
+def list_game_modes(api_manager: APIManager, active=False, community_ids=None, data=None):
+
+    ENDPOINT = "/tag_set/list"
+
+    if data is None:
+        data = {}
+
+    if active:
+        data['Active'] = active
+
+    if community_ids:
+        data['Communities'] = community_ids
+
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
 def list_users(api_manager: APIManager):

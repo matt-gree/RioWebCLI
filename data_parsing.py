@@ -17,7 +17,7 @@ def community_tags_to_dataframe(cache, community_tags_data):
     return pd.DataFrame(community_tags_data['Tags']).set_index('id')
 
 def print_community_sponsor(cache, community_sponsor):
-    return f'Community Sponsor: {community_sponsor['sponsor']}'
+    return f'Community Sponsor: {community_sponsor["sponsor"]}'
 
 def community_user_keys_to_dataframe(cache, community_user_keys_data):
     return pd.DataFrame(community_user_keys_data)
