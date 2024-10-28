@@ -58,9 +58,15 @@ class GeckoCodeValidator(Validator):
                 index += 1
         
         # After the loop, check if we ended in the middle of a line
-        if index != 0: 
+        if index == 17:
+            if char != '\n':
+                raise ValidationError(
+                    message="Invalid Gecko Code: Add a newline to the end of the gecko code",
+                    cursor_position=index
+                    )
+        elif index != 0: 
             raise ValidationError(
-                message="Invalid Gecko Code: Gecko code must end at the end of a line",
+                message=f'Invalid Gecko Code: The final line must have 17 characters but only has {index} characters',
                 cursor_position=len(in_str)
             )
         
@@ -275,8 +281,9 @@ api_inputs = {
         'prompt': 'Enter a description for your new tag: '
     },
     'gecko_code': {
-        'prompt': 'Enter the gecko code: ',
+        'prompt': 'Enter the gecko code (option-enter to sumbit on Mac, try shift-enter or control-enter on Windows):\n',
         'validator': GeckoCodeValidator(),
+        'multiline': True
     },
     'gecko_code_desc':{
         'prompt': 'Enter a description for your new tag: '
@@ -340,7 +347,7 @@ community_endpoints_prompt = {
 
 def get_prompt_input(prompt_dictionary, break_key='q'):
     completer = WordCompleter(prompt_dictionary.get('completer', []), ignore_case=True)
-    input = prompt(prompt_dictionary['prompt'], completer=completer, validator=prompt_dictionary.get('validator'), bottom_toolbar=prompt_dictionary.get('toolbar'))
+    input = prompt(prompt_dictionary['prompt'], completer=completer, validator=prompt_dictionary.get('validator'), bottom_toolbar=prompt_dictionary.get('toolbar'), multiline=prompt_dictionary.get('multiline', False))
     if input == break_key:
         return break_key
     if prompt_dictionary.get('input_processing'):
