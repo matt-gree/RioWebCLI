@@ -393,7 +393,7 @@ def game_mode_ladder(api_manager: APIManager, game_mode_name_closed, data=None):
 
 def list_users(api_manager: APIManager):
     return api_manager.send_request('/user/all')
-
+  
 
 @include_rio_key(RIO_KEY)
 def delete_game(api_manager: APIManager, game_id_dec):
