@@ -124,6 +124,7 @@ def community_manage(api_manager: APIManager, community_name_closed, user_list, 
     
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
+
 @include_rio_key(RIO_KEY)
 def community_sponsor(api_manager: APIManager, community_name_closed, action, data=None):
 
@@ -153,6 +154,7 @@ def community_sponsor(api_manager: APIManager, community_name_closed, action, da
     '''
     
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
 
 @include_rio_key(RIO_KEY)
 def community_key(api_manager: APIManager, community_name_closed, key_action, data=None):
@@ -224,7 +226,6 @@ def create_tag(api_manager: APIManager, tag_name_free, tag_desc, community_name_
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
 
-# New
 @include_rio_key(RIO_KEY)
 def update_tag(api_manager: APIManager, tag_id, tag_name_free=None, tag_desc=None, tag_type=None, gecko_code_desc=None, gecko_code=None, data=None):
     ENDPOINT = '/tag/update'
@@ -300,7 +301,6 @@ def create_game_mode(api_manager: APIManager, game_mode_name_free, game_mode_des
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
 
-# New
 @include_rio_key(RIO_KEY)
 def delete_game_mode(api_manager: APIManager, game_mode_name_closed, data=None):
     
@@ -336,9 +336,8 @@ def list_game_modes(api_manager: APIManager, active=False, community_ids=None, d
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
 
-# New
 @include_rio_key(RIO_KEY)
-def list_game_mode_tags(api_manager: APIManager, tag_set_id):
+def list_game_mode_tags(api_manager: APIManager, tag_set_id, data=None):
     
     ENDPOINT = f"/tag_set/{tag_set_id}"
 
@@ -379,16 +378,15 @@ def update_game_mode(api_manager: APIManager, tag_set_id, game_mode_name_free=No
     return api_manager.send_request(ENDPOINT, method='POST', data=data)
 
 
-# New
 @include_rio_key(RIO_KEY)
-def game_mode_ladder(api_manager: APIManager, tag_set_name_closed):
+def game_mode_ladder(api_manager: APIManager, game_mode_name_closed, data=None):
     
     ENDPOINT = "/tag_set/ladder"
 
     if data is None:
         data = {}
 
-    data['TagSet'] = tag_set_name_closed
+    data['TagSet'] = game_mode_name_closed
 
     return api_manager.send_request(ENDPOINT, method='POST', data=data)
 
@@ -396,21 +394,21 @@ def game_mode_ladder(api_manager: APIManager, tag_set_name_closed):
 def list_users(api_manager: APIManager):
     return api_manager.send_request('/user/all')
 
-# New
+
 @include_rio_key(RIO_KEY)
-def delete_game(api_manager: APIManager, game_id):
+def delete_game(api_manager: APIManager, game_id_dec):
     
-    ENDPOINT = "/tag_set/ladder"
+    ENDPOINT = "/delete_game/"
 
     if data is None:
         data = {}
 
-    data['game_id'] = game_id
+    data['game_id'] = game_id_dec
 
-    return api_manager.send_request(ENDPOINT, method='Post', data=data)
+    return api_manager.send_request(ENDPOINT, method='POST', data=data)
 
-# New
-def manual_game_submit(api_manager: APIManager, winner_username, winner_score, loser_username, loser_score, date, recalc=True, game_id_hex=None, game_id_dec=None):
+
+def manual_game_submit(api_manager: APIManager, winner_username, winner_score, loser_username, loser_score, date, tag_set, recalc=True, game_id_hex=None, game_id_dec=None, data=None):
 
     ENDPOINT = "/manual_submit_game/"
 
@@ -420,6 +418,7 @@ def manual_game_submit(api_manager: APIManager, winner_username, winner_score, l
         'loser_username': loser_username,
         'loser_score': loser_score,
         'date': date,
+        'tag_set': tag_set,
         'submitter_rio_key': RIO_KEY,
         'recalc': recalc
     }
@@ -427,6 +426,9 @@ def manual_game_submit(api_manager: APIManager, winner_username, winner_score, l
         data.update({'game_id_ded': game_id_dec})
     if game_id_hex:
         data.update({'game_id_hex': game_id_hex})
+
+    if debug_mode:
+        print(data)
 
     return api_manager.send_request(ENDPOINT, method='POST', data=data)
 

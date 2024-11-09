@@ -21,3 +21,17 @@ def print_community_sponsor(cache, community_sponsor):
 
 def community_user_keys_to_dataframe(cache, community_user_keys_data):
     return pd.DataFrame(community_user_keys_data)
+
+def game_mode_tags_to_dataframe(cache, game_mode_tags):
+    game_mode_info = game_mode_tags['Tag Set'][0]
+    game_mode_tags_df = pd.DataFrame(game_mode_info['tags']).set_index('id')
+    game_mode_info.pop('tags')
+    game_mode_info_df = pd.DataFrame([game_mode_info]).set_index('comm_id')
+    
+    return game_mode_info_df, game_mode_tags_df
+
+def ladder_to_dataframe(cache, ladder):
+    return pd.DataFrame.from_dict(ladder, orient='index')
+
+def print_data(cache, data):
+    return data

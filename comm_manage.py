@@ -2,6 +2,7 @@ from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
 from datetime import datetime
 import pytz
+import json
 from functools import partial
 
 from APIManager import APIManager
@@ -63,6 +64,51 @@ def community_manager_converter(user, ban=None, remove=None, key=None, admin=Non
         user_action_dict['admin'] = admin
 
     return user_action_dict
+
+def stat_file_converter(stat_file_path):
+    with open(stat_file_path) as f:
+        hud_data = json.load(f)
+
+    game_id_hex = int(hud_data['GameID'].replace(",", ""))
+    away_score = hud_data['Away Score']
+    home_score = hud_data['Home Score']
+    tag_set_id = hud_data['TagSetID']
+
+    reversed_dict = {v: k for k, v in cache.game_mode_dictionary().items()}
+    tag_set_name = reversed_dict[tag_set_id]
+    
+    try:
+        date = int(hud_data['Date - End'])
+    except:
+        datetime_format = "%a %b %d %H:%M:%S %Y"
+        est_time = datetime.strptime(hud_data['Date - End'], datetime_format).replace(tzinfo=pytz.timezone("America/New_York"))
+        date = int(est_time.timestamp())
+
+    if away_score > home_score:
+        winner_username = hud_data['Away Player']
+        loser_username = hud_data['Home Player']
+        winner_score = away_score
+        loser_score = home_score
+    elif home_score > away_score:
+        winner_username = hud_data['Home Player']
+        loser_username = hud_data['Away Player']
+        winner_score = home_score
+        loser_score = away_score
+    else:
+        raise Exception('Stat file supplied has no winner')
+    
+    manual_submit_dict = {
+        #'game_id_hex': game_id_hex,
+        'winner_username': winner_username,
+        'winner_score': winner_score,
+        'loser_username': loser_username,
+        'loser_score': loser_score,
+        'date': date,
+        'tag_set': tag_set_name
+    }
+
+    return manual_submit_dict
+
 
 def date_processing(date_string, eod=False):
     # Define the EST timezone
@@ -216,7 +262,7 @@ api_inputs = {
         'multiline': True
     },
     'gecko_code_desc':{
-        'prompt': 'Enter a description for your new tag: '
+        'prompt': 'Enter a description for your new gecko code: '
     },
     'game_mode_name_free': {
         'prompt': 'Enter the name for your game mode: '
@@ -264,6 +310,30 @@ api_inputs = {
         'completer': list(cache.game_mode_dictionary().keys()) + [''],
         'validator': OptionValidator(list(cache.game_mode_dictionary().keys()) + ['']),
         'input_processing': partial(dictionary_conversion, dictionary=cache.game_mode_dictionary())
+    },
+    'game_mode_name_closed': {
+        'prompt': 'Enter the name of the game mode: ',
+        'completer': list(cache.game_mode_dictionary().keys()),
+        'validator': OptionValidator(list(cache.game_mode_dictionary().keys()))
+    },
+    'tag_id': {
+        'prompt': 'Enter the name of the tag: ',
+        'completer': list(cache.tags_dictionary().keys()),
+        'validator': OptionValidator(list(cache.tags_dictionary().keys())),
+        'input_processing': partial(dictionary_conversion, dictionary=cache.tags_dictionary())
+    },
+    'tag_type': {
+        'prompt': 'Enter the tag type: ',
+        'completer': ['Component', 'Gecko Code'],
+        'validator': OptionValidator(['Component', 'Gecko Code']),
+    },
+    'game_id_dec': {
+        'prompt': 'Enter the GameID in decimal form (They are Hex in Rio Stat Files, Decimal on Rio Web): ',
+    },
+    'manual_submission_stat_file': {
+        'prompt': 'Enter the path to the stat file of the game to submit: ',
+        'input_processing': stat_file_converter,
+        'rename_arg': '_dict'
     }
 
 }
@@ -310,7 +380,11 @@ for key in community_endpoints[user_endpoint_choice]['inputs']:
     if build_prompt.get('rename_arg'):
         arg_name = build_prompt['rename_arg']
 
-    function_args[arg_name] = input
+    if arg_name == '_dict':
+        for key in input:
+            function_args[key] = input[key]
+    else:
+        function_args[arg_name] = input
     
 function_args['api_manager'] = manager
 if community_endpoints[user_endpoint_choice].get('fixed_inputs'):
@@ -318,4 +392,9 @@ if community_endpoints[user_endpoint_choice].get('fixed_inputs'):
 
 output = community_endpoints[user_endpoint_choice]['func'](**function_args)
 if community_endpoints[user_endpoint_choice].get('parse_data'):
-    print(community_endpoints[user_endpoint_choice]['parse_data'](cache, output))
+    result = community_endpoints[user_endpoint_choice]['parse_data'](cache, output)
+    if isinstance(result, (list, tuple, set)):  
+        for item in result:
+            print(item, '\n')
+    else:
+        print(result)

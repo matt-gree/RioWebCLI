@@ -123,6 +123,27 @@ community_endpoints = {
             'game_mode_to_mirror_tags_from'
         ]
     },
+    'Update Game Mode Name': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'game_mode_name_free'
+        ]
+    },
+    'Update Game Mode Description': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'game_mode_description'
+        ]
+    },
+    'Update Game Mode Type': {
+        'func': web_func.update_game_mode,
+        'inputs': [
+            'tag_set_id',
+            'game_mode_type'
+        ]
+    },
     'Add Tags to Game Mode': {
         'func': web_func.update_game_mode,
         'inputs': [
@@ -150,6 +171,74 @@ community_endpoints = {
             'tag_set_id',
             'start_date'
         ]
+    },
+    'List Game Mode Tags': {
+        'func': web_func.list_game_mode_tags,
+        'inputs': [
+            'tag_set_id'
+        ],
+        'parse_data': data_parsing.game_mode_tags_to_dataframe
+    },
+    'Show Game Mode Ladder': {
+        'func': web_func.game_mode_ladder,
+        'inputs': [
+            'game_mode_name_closed'
+        ],
+        'parse_data': data_parsing.ladder_to_dataframe
+    },
+    'Update Tag Name': {
+        'func': web_func.update_tag,
+        'inputs': [
+            'tag_id',
+            'tag_name_free'
+        ]
+    },
+    'Update Tag Description': {
+        'func': web_func.update_tag,
+        'inputs': [
+            'tag_id',
+            'tag_desc'
+        ]
+    },
+    'Update Tag Type': {
+        'func': web_func.update_tag,
+        'inputs': [
+            'tag_id',
+            'tag_type',
+        ]
+    },
+    'Update Tag Gecko Code Desc': {
+        'func': web_func.update_tag,
+        'inputs': [
+            'tag_id',
+            'gecko_code_desc',
+        ]
+    },
+    'Update Tag Gecko Code': {
+        'func': web_func.update_tag,
+        'inputs': [
+            'tag_id',
+            'gecko_code',
+        ]
+    },
+    'Delete Game Mode': {
+        'func': web_func.delete_game_mode,
+        'inputs': [
+            'game_mode_name_closed'
+        ]
+    },
+    'Delete Game': {
+        'func': web_func.delete_game,
+        'inputs': [
+            'game_id_dec'
+        ]
+    },
+    'Manual Game Submission From Statfile': {
+        'func': web_func.manual_game_submit,
+        'inputs': [
+            'manual_submission_stat_file'
+        ],
+        'parse_data': data_parsing.print_data
     }
 }
 
