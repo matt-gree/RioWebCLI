@@ -32,6 +32,7 @@ def create_community(api_manager: APIManager, community_name_free, private, glob
     ### calls api manager and sends the request
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
+
 @include_rio_key(RIO_KEY)
 def community_invite(api_manager: APIManager, community_name_closed, invite_list, data=None):
 
@@ -67,6 +68,7 @@ def community_members(api_manager: APIManager, community_name_closed, data=None)
     'date_joined': 1706938397, 'id': 2497, 'invited': True, 'user_id': 28}
     '''
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
 
 @include_rio_key(RIO_KEY)
 def community_tags(api_manager: APIManager, community_name_closed, data=None):
@@ -194,6 +196,7 @@ def community_update(api_manager: APIManager, community_name_closed, community_n
     
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
+
 @include_rio_key(RIO_KEY)
 def create_tag(api_manager: APIManager, tag_name_free, tag_desc, community_name_closed, tag_type, gecko_code_desc=None, gecko_code=None, data=None):
 
@@ -220,6 +223,36 @@ def create_tag(api_manager: APIManager, tag_name_free, tag_desc, community_name_
     
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
+
+# New
+@include_rio_key(RIO_KEY)
+def update_tag(api_manager: APIManager, tag_id, tag_name_free=None, tag_desc=None, tag_type=None, gecko_code_desc=None, gecko_code=None, data=None):
+    ENDPOINT = '/tag/update'
+
+    if data is None:
+        data = {}
+
+    data['tag_id'] = tag_id
+
+    if tag_name_free is not None:
+        data['name'] = tag_name_free
+    if tag_desc is not None:
+        data['desc'] = tag_desc
+    if tag_type is not None:
+        data['type'] = tag_type
+    
+    if tag_type == 'Gecko Code':
+        if gecko_code is not None:
+            data['gecko_code'] = gecko_code
+        if gecko_code_desc is not None:
+            data['gecko_code_desc'] = gecko_code_desc
+
+    if debug_mode:
+        print(data)
+
+    return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
+
 @include_rio_key(RIO_KEY)
 def list_tags(api_manager: APIManager, tag_types=None, community_ids=None, data=None):
     
@@ -236,6 +269,7 @@ def list_tags(api_manager: APIManager, tag_types=None, community_ids=None, data=
 
     # Make the API request
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
 
 @include_rio_key(RIO_KEY)
 def create_game_mode(api_manager: APIManager, game_mode_name_free, game_mode_desc, game_mode_type, community_name_closed, start_date, end_date, add_tag_ids=None, game_mode_to_mirror_tags_from=None, data=None):
@@ -264,6 +298,52 @@ def create_game_mode(api_manager: APIManager, game_mode_name_free, game_mode_des
         print(data)
 
     return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
+
+# New
+@include_rio_key(RIO_KEY)
+def delete_game_mode(api_manager: APIManager, game_mode_name_closed, data=None):
+    
+    ENDPOINT = "/tag_set/delete"
+
+    if data is None:
+        data = {}
+
+    data.update({
+        'name': game_mode_name_closed,
+    })
+
+    if debug_mode:
+        print(data)
+
+    return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
+
+@include_rio_key(RIO_KEY)    
+def list_game_modes(api_manager: APIManager, active=False, community_ids=None, data=None):
+
+    ENDPOINT = "/tag_set/list"
+
+    if data is None:
+        data = {}
+
+    if active:
+        data['Active'] = active
+
+    if community_ids:
+        data['Communities'] = community_ids
+
+    return api_manager.send_request(ENDPOINT, method="POST", data=data)
+
+
+# New
+@include_rio_key(RIO_KEY)
+def list_game_mode_tags(api_manager: APIManager, tag_set_id):
+    
+    ENDPOINT = f"/tag_set/{tag_set_id}"
+
+    return api_manager.send_request(ENDPOINT, method='GET')
+
 
 @include_rio_key(RIO_KEY)
 def update_game_mode(api_manager: APIManager, tag_set_id, game_mode_name_free=None, game_mode_desc=None, game_mode_type=None, start_date=None, end_date=None, add_tag_ids=None, remove_tag_ids=None, data=None):
@@ -297,25 +377,59 @@ def update_game_mode(api_manager: APIManager, tag_set_id, game_mode_name_free=No
         print(data)
 
     return api_manager.send_request(ENDPOINT, method='POST', data=data)
-    
-@include_rio_key(RIO_KEY)    
-def list_game_modes(api_manager: APIManager, active=False, community_ids=None, data=None):
 
-    ENDPOINT = "/tag_set/list"
+
+# New
+@include_rio_key(RIO_KEY)
+def game_mode_ladder(api_manager: APIManager, tag_set_name_closed):
+    
+    ENDPOINT = "/tag_set/ladder"
 
     if data is None:
         data = {}
 
-    if active:
-        data['Active'] = active
+    data['TagSet'] = tag_set_name_closed
 
-    if community_ids:
-        data['Communities'] = community_ids
+    return api_manager.send_request(ENDPOINT, method='POST', data=data)
 
-    return api_manager.send_request(ENDPOINT, method="POST", data=data)
 
 def list_users(api_manager: APIManager):
     return api_manager.send_request('/user/all')
+
+# New
+@include_rio_key(RIO_KEY)
+def delete_game(api_manager: APIManager, game_id):
+    
+    ENDPOINT = "/tag_set/ladder"
+
+    if data is None:
+        data = {}
+
+    data['game_id'] = game_id
+
+    return api_manager.send_request(ENDPOINT, method='Post', data=data)
+
+# New
+def manual_game_submit(api_manager: APIManager, winner_username, winner_score, loser_username, loser_score, date, recalc=True, game_id_hex=None, game_id_dec=None):
+
+    ENDPOINT = "/manual_submit_game/"
+
+    data = {
+        'winner_username': winner_username,
+        'winner_score': winner_score,
+        'loser_username': loser_username,
+        'loser_score': loser_score,
+        'date': game_date,
+        'submitter_rio_key': RIO_KEY,
+        'recalc': recalc
+    }
+    if game_id_dec:
+        data.update({'game_id_ded': game_id_dec})
+    if game_id_hex:
+        data.update({'game_id_hex': game_id_hex})
+
+    return api_manager.send_request(ENDPOINT, method='POST', data=data)
+
 
 if __name__ == '__main__':
     sample_inputs = {
