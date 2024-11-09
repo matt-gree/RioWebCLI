@@ -419,7 +419,7 @@ def manual_game_submit(api_manager: APIManager, winner_username, winner_score, l
         'winner_score': winner_score,
         'loser_username': loser_username,
         'loser_score': loser_score,
-        'date': game_date,
+        'date': date,
         'submitter_rio_key': RIO_KEY,
         'recalc': recalc
     }
