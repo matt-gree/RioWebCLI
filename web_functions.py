@@ -9,7 +9,7 @@ debug_mode = True
 
 ### example of including the decorator. I'd also like to think that you could streamline the params part too but I didn't have anything come to mind right now
 @include_rio_key(RIO_KEY)
-def create_community(api_manager: APIManager, community_name_free, private, global_link, desc, comm_type="Unofficial", data=None):
+def create_community(api_manager: APIManager, community_name_free, private, global_link, comm_desc, comm_type="Unofficial", data=None):
     ### this is because of the decorator, by using it, the args for the function get kinda wonky, so the way to fix it is to pass it data so that what it is expecting is there
     
     ENDPOINT = "/community/create"
@@ -23,7 +23,7 @@ def create_community(api_manager: APIManager, community_name_free, private, glob
         "type": comm_type, # Official or Unnoficial
         "private": private, # True or False
         "global_link": global_link, # True or False
-        "desc": desc,
+        "desc": comm_desc,
     })
 
     if debug_mode:
