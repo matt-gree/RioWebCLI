@@ -255,15 +255,15 @@ def update_tag(api_manager: APIManager, tag_id, tag_name_free=None, tag_desc=Non
 
 
 @include_rio_key(RIO_KEY)
-def list_tags(api_manager: APIManager, tag_types=None, community_ids=None, data=None):
+def list_tags(api_manager: APIManager, tag_type=None, community_ids=None, data=None):
     
     ENDPOINT = "/tag/list"
 
     if data is None:
         data = {}
 
-    if tag_types:
-        data['Types'] = tag_types
+    if tag_type:
+        data['Types'] = tag_type
 
     if community_ids:
         data['community_ids'] = community_ids

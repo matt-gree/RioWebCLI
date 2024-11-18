@@ -33,5 +33,21 @@ def game_mode_tags_to_dataframe(cache, game_mode_tags):
 def ladder_to_dataframe(cache, ladder):
     return pd.DataFrame.from_dict(ladder, orient='index')
 
+def tags_list_to_dataframe(cache, tags):
+    return pd.DataFrame(tags['Tags']).set_index('id')
+
+def print_df_columns_by_row(cache, df):
+    output = []
+    for index, row in df.iterrows():
+        output.append(f"ID: {index}:")
+        for column, value in row.items():
+            if isinstance(value, str) and '\n' in value:
+                # Add value starting on a new line if it contains a newline
+                output.append(f"{column}:\n{value[:-1]}")
+            else:
+                output.append(f"{column}: {value}")
+    return "\n".join(output)
+
+
 def print_data(cache, data):
     return data
