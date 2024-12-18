@@ -1,8 +1,8 @@
-import web_functions as web_func
+import project_rio_lib.web_functions as web_func
 import local_functions as loc_func
 import data_parsing
 from functools import partial
-from CompleterCache import CompleterCache
+from project_rio_lib.web_caching import CompleterCache
 
 class CommunityManagerBase:
     def __init__(self, cache: CompleterCache):
@@ -252,5 +252,21 @@ class CommunityManagerBase:
                     'tag_name_closed'
                 ],
                 'parse_data': data_parsing.print_df_columns_by_row
+            },
+            'Add Member to User Group': {
+                'func': web_func.add_user_to_user_group,
+                'inputs': [
+                    'username',
+                    'group_name'
+                ],
+                'parse_data': data_parsing.print_data
+            },
+            'Check Member in User Group': {
+                'func': web_func.check_for_member_in_user_group,
+                'inputs': [
+                    'username',
+                    'group_name'
+                ],
+                'parse_data': data_parsing.print_data
             }
         }

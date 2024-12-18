@@ -5,8 +5,8 @@ import pytz
 import json
 from functools import partial
 
-from APIManager import APIManager
-from CompleterCache import CompleterCache
+from project_rio_lib.api_manager import APIManager
+from project_rio_lib.web_caching import CompleterCache
 from comm_manager_functions import CommunityManagerBase
 from prompt_validators import OptionValidator, GeckoCodeValidator, DateValidator
 
@@ -340,6 +340,16 @@ api_inputs = {
         'completer': list(cache.tags_dictionary().keys()),
         'validator': OptionValidator(list(cache.tags_dictionary().keys()))
     },
+    'username': {
+        'prompt': "Enter the player's Project Rio username: ",
+        'completer': cache.users(),
+        'validator': OptionValidator(cache.users())
+    },
+    'group_name': {
+        'prompt': 'Enter the user group name: ',
+        'completer': ['Banned'],
+        'validator': OptionValidator(['Banned'])
+    }
 
 }
 

@@ -2,8 +2,8 @@ from prompt_toolkit import prompt
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit.completion import WordCompleter
 
-from APIManager import APIManager
-from CompleterCache import CompleterCache
+from project_rio_lib.api_manager import APIManager
+from project_rio_lib.web_caching import CompleterCache
 
 manager = APIManager()
 cache = CompleterCache(manager)
