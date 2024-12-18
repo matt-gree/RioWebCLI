@@ -5,9 +5,9 @@ import pytz
 import json
 from functools import partial
 
-from APIManager import APIManager
-from CompleterCache import CompleterCache
-from comm_manager_functions import community_endpoints, supported_endpoints
+from project_rio_lib.api_manager import APIManager
+from project_rio_lib.web_caching import CompleterCache
+from comm_manager_functions import CommunityManagerBase
 from prompt_validators import OptionValidator, GeckoCodeValidator, DateValidator
 
 manager = APIManager()
@@ -334,14 +334,31 @@ api_inputs = {
         'prompt': 'Enter the path to the stat file of the game to submit: ',
         'input_processing': stat_file_converter,
         'rename_arg': '_dict'
+    },
+    'tag_name_closed': {
+        'prompt': 'Enter the tag name: ',
+        'completer': list(cache.tags_dictionary().keys()),
+        'validator': OptionValidator(list(cache.tags_dictionary().keys()))
+    },
+    'username': {
+        'prompt': "Enter the player's Project Rio username: ",
+        'completer': cache.users(),
+        'validator': OptionValidator(cache.users())
+    },
+    'group_name': {
+        'prompt': 'Enter the user group name: ',
+        'completer': ['Banned'],
+        'validator': OptionValidator(['Banned'])
     }
 
 }
 
+comm_manage_funcs = CommunityManagerBase(cache)
+
 community_endpoints_prompt = {
     'prompt': 'What would you like to do: ',
-    'completer': supported_endpoints,
-    'validator': OptionValidator(supported_endpoints)
+    'completer': comm_manage_funcs.community_endpoints.keys(),
+    'validator': OptionValidator(comm_manage_funcs.community_endpoints.keys())
 }
 
 def get_prompt_input(prompt_dictionary, break_key='q'):
@@ -369,7 +386,7 @@ def run_prompt(prompt_dictionary):
 function_args = {}
 
 user_endpoint_choice = run_prompt(community_endpoints_prompt)
-for key in community_endpoints[user_endpoint_choice]['inputs']:
+for key in comm_manage_funcs.community_endpoints[user_endpoint_choice]['inputs']:
     build_prompt = api_inputs[key]
     input = run_prompt(build_prompt)
 
@@ -387,12 +404,12 @@ for key in community_endpoints[user_endpoint_choice]['inputs']:
         function_args[arg_name] = input
     
 function_args['api_manager'] = manager
-if community_endpoints[user_endpoint_choice].get('fixed_inputs'):
-    function_args = function_args | community_endpoints[user_endpoint_choice]['fixed_inputs']
+if comm_manage_funcs.community_endpoints[user_endpoint_choice].get('fixed_inputs'):
+    function_args = function_args | comm_manage_funcs.community_endpoints[user_endpoint_choice]['fixed_inputs']
 
-output = community_endpoints[user_endpoint_choice]['func'](**function_args)
-if community_endpoints[user_endpoint_choice].get('parse_data'):
-    result = community_endpoints[user_endpoint_choice]['parse_data'](cache, output)
+output = comm_manage_funcs.community_endpoints[user_endpoint_choice]['func'](**function_args)
+if comm_manage_funcs.community_endpoints[user_endpoint_choice].get('parse_data'):
+    result = comm_manage_funcs.community_endpoints[user_endpoint_choice]['parse_data'](cache, output)
     if isinstance(result, (list, tuple, set)):  
         for item in result:
             print(item, '\n')
