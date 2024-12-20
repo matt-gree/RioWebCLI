@@ -5,3 +5,4 @@ rio_key.json
 __pycache__
 .vscode/settings.json
 test.py
+cache/cache.pkl
