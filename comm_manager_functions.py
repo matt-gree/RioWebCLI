@@ -2,21 +2,16 @@ import project_rio_lib.web_functions as web_func
 import api_parameters as param
 import data_parsing
 from functools import partial
-from project_rio_lib.web_caching import CompleterCache
 
-class CommunityManagerBase:
-    def __init__(self, cache: CompleterCache):
-        self.cache = cache
-
-community_endpoints = {
+community_functions = {
     'Create Community': {
-    'func': web_func.create_community,
-    'inputs': [
-        param.community_name_free,
-        param.comm_type,
-        param.private,
-        param.global_link,
-        param.comm_desc
+        'func': web_func.create_community,
+        'inputs': [
+            param.community_name_free,
+            param.comm_type,
+            param.private,
+            param.global_link,
+            param.comm_desc
         ]
     },
     'Remove Members': {
@@ -97,7 +92,10 @@ community_endpoints = {
             param.key_action
         ],
         'parse_data': data_parsing.community_user_keys_to_dataframe
-    },
+    }
+}
+
+tag_functions = {
     'Create Component Tag': {
         'func': partial(web_func.create_tag, tag_type='Component'),
         'inputs': [
@@ -116,6 +114,44 @@ community_endpoints = {
             param.gecko_code_desc
         ]
     },
+    'Update Tag Name': {
+        'func': web_func.update_tag,
+        'inputs': [
+            param.tag_id,
+            param.tag_name_free
+        ]
+    },
+    'Update Tag Description': {
+        'func': web_func.update_tag,
+        'inputs': [
+            param.tag_id,
+            param.tag_desc
+        ]
+    },
+    'Update Tag Type': {
+        'func': web_func.update_tag,
+        'inputs': [
+            param.tag_id,
+            param.tag_type
+        ]
+    },
+    'Update Tag Gecko Code Desc': {
+        'func': web_func.update_tag,
+        'inputs': [
+            param.tag_id,
+            param.gecko_code_desc
+        ]
+    },
+    'Update Tag Gecko Code': {
+        'func': web_func.update_tag,
+        'inputs': [
+            param.tag_id,
+            param.gecko_code
+        ]
+    },
+}
+
+game_mode_functions = {
     'Create Game Mode': {
         'func': web_func.create_game_mode,
         'inputs': [
@@ -192,47 +228,15 @@ community_endpoints = {
         ],
         'parse_data': data_parsing.ladder_to_dataframe
     },
-    'Update Tag Name': {
-        'func': web_func.update_tag,
-        'inputs': [
-            param.tag_id,
-            param.tag_name_free
-        ]
-    },
-    'Update Tag Description': {
-        'func': web_func.update_tag,
-        'inputs': [
-            param.tag_id,
-            param.tag_desc
-        ]
-    },
-    'Update Tag Type': {
-        'func': web_func.update_tag,
-        'inputs': [
-            param.tag_id,
-            param.tag_type
-        ]
-    },
-    'Update Tag Gecko Code Desc': {
-        'func': web_func.update_tag,
-        'inputs': [
-            param.tag_id,
-            param.gecko_code_desc
-        ]
-    },
-    'Update Tag Gecko Code': {
-        'func': web_func.update_tag,
-        'inputs': [
-            param.tag_id,
-            param.gecko_code
-        ]
-    },
     'Delete Game Mode': {
         'func': web_func.delete_game_mode,
         'inputs': [
             param.game_mode_name_closed
         ]
     },
+}
+
+rio_mod_functions = {
     'Delete Game': {
         'func': web_func.delete_game,
         'inputs': [
@@ -245,12 +249,36 @@ community_endpoints = {
             param.manual_submission_stat_file
         ],
         'parse_data': data_parsing.print_data
+    },
+    'Add User to User Group (Ban Users)': {
+        'func': web_func.add_user_to_user_group,
+        'inputs' : [
+            param.username,
+            param.user_group
+        ]
+    },
+    'Remove User from User Group': {
+        'func': web_func.remove_user_from_user_group,
+        'inputs': [
+            param.username,
+            param.user_group
+        ],
+        'parse_data': data_parsing.print_data
+    },
+    'Check Membership in User Group': {
+        'func': web_func.check_for_member_in_user_group,
+        'inputs' : [
+            param.username,
+            param.user_group
+        ],
+        'parse_data': data_parsing.print_data
+    },
+    'Check Members of User Group': {
+        'func': web_func.check_members_of_user_groups,
+        'inputs': [
+            param.user_group
+        ],
+        'parse_data': data_parsing.print_data
     }
 }
 
-supported_endpoints = []
-
-# Iterate through the dictionary
-for key, value in community_endpoints.items():
-    if 'unsupported' not in value or value['unsupported'] is not True:
-        supported_endpoints.append(key)

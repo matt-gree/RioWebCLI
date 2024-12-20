@@ -1,154 +1,151 @@
-from prompt_toolkit import Application
+from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, HSplit, Window
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
-from prompt_toolkit.key_binding.bindings.completion import display_completions_like_readline
-from prompt_toolkit.key_binding.defaults import load_key_bindings
-from prompt_toolkit.widgets import TextArea
-from prompt_toolkit.completion import WordCompleter
-from prompt_toolkit.validation import Validator, ValidationError
-from prompt_toolkit.filters import Condition
-from datetime import datetime
-import re
+from prompt_toolkit.widgets import RadioList, Button, Label
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.styles import Style
+from prompt_toolkit.layout.containers import HSplit
+from prompt_toolkit import print_formatted_text as print_formatted
 
-class DateValidator(Validator):
-    def validate(self, document):
-        text = document.text
-        try:
-            if text:
-                datetime.strptime(text, '%Y-%m-%d')
-        except ValueError:
-            raise ValidationError(message='Invalid date format. Use YYYY-MM-DD')
+# Define the dropdown options
+function_groups = [
+    ('manage_communities', 'Manage Communities'),
+    ('manage_game_modes', 'Manage Game Modes'),
+    ('manage_tags', 'Manage Tags'),
+    ('rio_mod_functions', 'Rio Mod Functions'),
+]
 
-class UsernameValidator(Validator):
-    def validate(self, document):
-        text = document.text
-        if not re.match(r'^[a-zA-Z0-9_]{3,}$', text):
-            raise ValidationError(message='Username must be alphanumeric with underscores, min 3 chars')
+functions = {
+    'manage_communities': [
+        ('add_community', 'Add Community'),
+        ('remove_community', 'Remove Community'),
+        ('edit_community', 'Edit Community')
+    ],
+    'manage_game_modes': [
+        ('add_game_mode', 'Add Game Mode'),
+        ('remove_game_mode', 'Remove Game Mode'),
+        ('edit_game_mode', 'Edit Game Mode')
+    ],
+    'manage_tags': [
+        ('add_tag', 'Add Tag'),
+        ('remove_tag', 'Remove Tag'),
+        ('edit_tag', 'Edit Tag')
+    ],
+    'rio_mod_functions': [
+        ('update_rio', 'Update Rio Mod'),
+        ('rollback_rio', 'Rollback Rio Mod'),
+        ('configure_rio', 'Configure Rio Mod')
+    ]
+}
 
-class CLIInterface:
-    def __init__(self):
-        self.current_focus = 0
-        self.kb = KeyBindings()
-        self.done = False
-        
-        # Sample completers - replace these with your actual options
-        self.tag_completer = WordCompleter(['important', 'urgent', 'low-priority', 'bug', 'feature'])
-        self.username_completer = WordCompleter(['admin', 'user1', 'user2'])
 
-        # Create input fields
-        self.username_field = TextArea(
-            height=1,
-            prompt='Username: ',
-            completer=self.username_completer,
-            validator=UsernameValidator(),
-            multiline=False,
-            complete_while_typing=True
+def _create_app(dialog, style):
+    """Create an application for the dialog."""
+    return Application(
+        layout=Layout(dialog),
+        full_screen=True,
+        style=style,
+    )
+
+
+def radiolist_dialog(
+    title: str = "",
+    text: str = "",
+    ok_text: str = "Ok",
+    cancel_text: str = "Cancel",
+    values: list = None,
+    default: str = None,
+    style: Style = None,
+):
+    """
+    Display a simple list of elements the user can choose amongst, and handles two menus.
+    """
+    if values is None:
+        values = []
+
+    selected_category = None
+    selected_function = None
+
+    def ok_handler() -> None:
+        """Handler when the user selects 'OK'"""
+        get_app().exit(result=selected_function)
+
+    def _return_none() -> None:
+        """Cancel handler"""
+        get_app().exit(result=None)
+
+    # Create the first menu (category selection)
+    def create_category_menu():
+        nonlocal selected_category
+        radio_list = RadioList(values=values, default=default)
+
+        def on_category_selected() -> None:
+            selected_category = radio_list.current_value[0]
+            create_function_menu(selected_category)
+            get_app().exit()
+
+        radio_list.on_select = on_category_selected
+
+        dialog = Dialog(
+            title=title,
+            body=HSplit([Label(text=text), radio_list]),
+            buttons=[
+                Button(text=ok_text, handler=ok_handler),
+                Button(text=cancel_text, handler=_return_none),
+            ]
         )
-        
-        self.date_field = TextArea(
-            height=1,
-            prompt='Date: ',
-            validator=DateValidator(),
-            multiline=False
+
+        return dialog
+
+    # Create the second menu (function selection based on category)
+    def create_function_menu(category):
+        nonlocal selected_function
+        function_values = functions.get(category, [])
+        radio_list = RadioList(values=function_values)
+
+        def on_function_selected() -> None:
+            selected_function = radio_list.current_value[0]
+            get_app().exit()
+
+        radio_list.on_select = on_function_selected
+
+        dialog = Dialog(
+            title=title,
+            body=HSplit([Label(text=f"Select function for {category}:"), radio_list]),
+            buttons=[
+                Button(text=ok_text, handler=ok_handler),
+                Button(text=cancel_text, handler=_return_none),
+            ]
         )
-        
-        self.tag_field = TextArea(
-            height=1,
-            prompt='Tag: ',
-            completer=self.tag_completer,
-            multiline=False,
-            complete_while_typing=True
-        )
 
-        self.fields = [self.username_field, self.date_field, self.tag_field]
-        self.setup_keybindings()
+        return dialog
 
-    def setup_keybindings(self):
-        @self.kb.add('up')
-        def _(event):
-            self.current_focus = (self.current_focus - 1) % len(self.fields)
-            self.app.layout.focus(self.fields[self.current_focus])
+    # Create and show the first menu dialog
+    dialog = create_category_menu()
 
-        @self.kb.add('down')
-        def _(event):
-            self.current_focus = (self.current_focus + 1) % len(self.fields)
-            self.app.layout.focus(self.fields[self.current_focus])
+    return _create_app(dialog, style)
 
-        @self.kb.add('enter')
-        def _(event):
-            try:
-                # Validate all fields
-                self.username_field.buffer.validate()
-                self.date_field.buffer.validate()
-                # Tag validation is optional
-                self.done = True
-                event.app.exit()
-            except ValidationError:
-                # If validation fails, don't exit
-                pass
 
-        @self.kb.add('c-c')
-        def _(event):
-            self.done = False
-            event.app.exit()
+def _return_none() -> None:
+    """No action"""
+    pass
 
-        # Add completion key bindings
-        @self.kb.add('tab')
-        def _(event):
-            buff = event.current_buffer
-            if buff.completer:
-                buff.complete_next()
 
-        @self.kb.add('s-tab')
-        def _(event):
-            buff = event.current_buffer
-            if buff.completer:
-                buff.complete_previous()
+class Dialog:
+    def __init__(self, title, body, buttons):
+        self.title = title
+        self.body = body
+        self.buttons = buttons
 
-    def create_layout(self):
-        return Layout(HSplit([
-            Window(height=1),  # Top padding
-            *self.fields,
-            Window(height=1),  # Middle padding
-            Window(
-                content=FormattedTextControl(
-                    text="Press Enter to submit (Tab for completions), Ctrl-C to cancel"
-                ),
-                height=1
-            ),
-            Window(height=1),  # Bottom padding
-        ]))
 
-    def run(self):
-        # Merge our key bindings with the default ones
-        kb = merge_key_bindings([
-            load_key_bindings(),  # Default bindings
-            self.kb              # Our custom bindings
-        ])
+def run_two_page_dialog():
+    # Call the radiolist_dialog with two menus
+    result = radiolist_dialog(
+        title="Select a Function",
+        text="Choose a category and then select a function",
+        values=function_groups,
+    )
+    print(result)  # The selected option
 
-        self.app = Application(
-            layout=self.create_layout(),
-            key_bindings=kb,
-            full_screen=True,
-            mouse_support=True
-        )
-        
-        self.app.layout.focus(self.fields[0])
-        self.app.run()
-        return self.done
 
-    def get_values(self):
-        return {
-            'username': self.username_field.text,
-            'date': self.date_field.text,
-            'tag': self.tag_field.text
-        }
-
-if __name__ == '__main__':
-    interface = CLIInterface()
-    if interface.run():
-        values = interface.get_values()
-        print("\nSubmitted values:", values)
-    else:
-        print("\nCancelled by user")
+if __name__ == "__main__":
+    run_two_page_dialog()

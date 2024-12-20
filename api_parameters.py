@@ -261,7 +261,7 @@ invite_list = APIParameter(
 
 community_manage_bans = APIParameter(
     prompt='Would you like to ban or unban members?: ',
-    arg_name = 'community_manage_bans',
+    arg_name = 'user_list',
     completer=['ban', 'unban'],
     validator=OptionValidator(['ban', 'unban']),
     subparameters={
@@ -468,4 +468,18 @@ manual_submission_stat_file = APIParameter(
     prompt='Enter the path to the stat file of the game to submit: ',
     arg_name = '_dict',
     input_processing=InputConverters.stat_file_converter,
+)
+
+username = APIParameter(
+    prompt = "Enter the player's username: ",
+    arg_name='username',
+    completer = cache.users(),
+    validator = cache.users()
+)
+
+user_group = APIParameter(
+    prompt= 'Enter the name of the user group: ',
+    arg_name='group_name',
+    completer=['Banned'],
+    validator=['Banned']
 )
