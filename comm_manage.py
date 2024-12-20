@@ -57,12 +57,12 @@ for parameter in community_endpoints[user_endpoint_choice]['inputs']:
         function_args[arg_name] = input
     
 function_args['api_manager'] = manager
-if comm_manage_funcs.community_endpoints[user_endpoint_choice].get('fixed_inputs'):
-    function_args = function_args | comm_manage_funcs.community_endpoints[user_endpoint_choice]['fixed_inputs']
+if community_endpoints[user_endpoint_choice].get('fixed_inputs'):
+    function_args = function_args | community_endpoints[user_endpoint_choice]['fixed_inputs']
 
-output = comm_manage_funcs.community_endpoints[user_endpoint_choice]['func'](**function_args)
-if comm_manage_funcs.community_endpoints[user_endpoint_choice].get('parse_data'):
-    result = comm_manage_funcs.community_endpoints[user_endpoint_choice]['parse_data'](cache, output)
+output = community_endpoints[user_endpoint_choice]['func'](**function_args)
+if community_endpoints[user_endpoint_choice].get('parse_data'):
+    result = community_endpoints[user_endpoint_choice]['parse_data'](cache, output)
     if isinstance(result, (list, tuple, set)):  
         for item in result:
             print(item, '\n')
