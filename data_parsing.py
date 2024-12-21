@@ -1,15 +1,23 @@
 import pandas as pd
+from datetime import datetime
+import pytz
+
+from project_rio_lib.web_caching import CompleterCache
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None) 
 
-def community_members_to_dataframe(cache, community_members_data):
+def community_members_to_dataframe(cache: CompleterCache, community_members_data):
     members_list = community_members_data['Members']
     df = pd.DataFrame(members_list)
-    df2 = pd.DataFrame(list(cache.users_dict.items()), columns=['user_id', 'username'])
+    df2 = pd.DataFrame(list(cache.users_dictionary().items()), columns=['user_id', 'username'])
     df2['user_id'] = pd.to_numeric(df2['user_id'])
     df = df.merge(df2, on='user_id', how='left')
     df = df.set_index('username')
+
+    est = pytz.timezone('US/Eastern')
+    df['date_joined'] = pd.to_datetime(df['date_joined'], unit='s').dt.tz_localize('UTC').dt.tz_convert(est)
+    df['date_joined'] = df['date_joined'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
     return df
 
