@@ -3,7 +3,7 @@ from prompt_toolkit.completion import WordCompleter
 
 from project_rio_lib.api_manager import APIManager
 from project_rio_lib.web_caching import CompleterCache
-from comm_manager_functions import community_functions, tag_functions, game_mode_functions, rio_mod_functions
+from comm_manager_functions import community_functions, tag_functions, game_mode_functions, rio_mod_functions, data_endpoints
 from prompt_validators import OptionValidator
 from api_parameters import APIParameter
 from function_executer import ParameterProcessor
@@ -28,7 +28,8 @@ function_groups = {
     'Manage Communities': community_functions,
     'Manage Game Modes': game_mode_functions,
     'Manage Tags': tag_functions,
-    'Rio Mod Functions': rio_mod_functions
+    'Rio Mod Functions': rio_mod_functions,
+    'Data Endpoints': data_endpoints
 }
 print(f'\nMenu Options: ')
 for key in function_groups.keys():

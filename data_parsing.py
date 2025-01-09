@@ -1,8 +1,10 @@
 import pandas as pd
+import os
 from datetime import datetime
 import pytz
 
 from project_rio_lib.web_caching import CompleterCache
+from project_rio_lib.endpoint_handling import games_endpoints
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None) 
@@ -59,3 +61,19 @@ def print_df_columns_by_row(cache, df):
 
 def print_data(cache, data):
     return data
+
+def games_endpoint_to_excel(cache: CompleterCache, games_endpoint):
+    df = games_endpoints(games_endpoint, cache)
+
+    # Specify the folder path in the same directory
+    folder_path = "endpoint_data"
+    os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
+
+    # Generate a filename with the current date
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    file_name = f"games_data_{current_date_time}.xlsx"
+    file_path = os.path.join(folder_path, file_name)
+
+    # Save to Excel
+    df.to_excel(file_path, index=False)
+    return file_path

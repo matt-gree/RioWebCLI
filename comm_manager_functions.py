@@ -4,7 +4,6 @@ import api_parameters as param
 import data_parsing
 from functools import partial
 
-
 class FunctionHandler:
     def __init__(
         self,
@@ -295,4 +294,23 @@ rio_mod_functions = {
         ],
         parse_data=data_parsing.print_data,
     ),
+}
+
+
+data_endpoints = {
+    'Games Endpoint': FunctionHandler(
+        func=web_func.games_endpoint,
+        inputs=[
+            param.data_tag,
+            param.data_exclude_tag,
+            param.data_username,
+            param.data_vs_username,
+            param.data_exclude_username,
+            param.data_captain,
+            param.data_vs_captain,
+            param.data_stadium,
+            param.data_limit_games
+        ],
+        parse_data=data_parsing.games_endpoint_to_excel
+    )
 }

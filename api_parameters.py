@@ -422,18 +422,18 @@ remove_tag_ids = APIParameter(
 )
 
 game_mode_to_mirror_tags_from = APIParameter(
-    prompt='Enter the game mode to mirror tags from in this new game mode (enter to skip): ',
+    prompt='Enter the game mode to mirror tags from in this new game mode (q to skip): ',
     arg_name = 'game_mode_to_mirror_tags_from',
-    completer=list(cache.game_mode_dictionary().keys()) + [''],
-    validator=OptionValidator(list(cache.game_mode_dictionary().keys()) + ['']),
+    completer=list(cache.game_mode_dictionary().keys()) + ['q'],
+    validator=OptionValidator(list(cache.game_mode_dictionary().keys()) + ['q']),
     input_processing=partial(InputConverters.dictionary_conversion, dictionary=cache.game_mode_dictionary())
 )
 
 tag_set_id = APIParameter(
     prompt='Enter the name of the game mode: ',
     arg_name = 'tag_set_id',
-    completer=list(cache.game_mode_dictionary().keys()) + [''],
-    validator=OptionValidator(list(cache.game_mode_dictionary().keys()) + ['']),
+    completer=list(cache.game_mode_dictionary().keys()),
+    validator=OptionValidator(list(cache.game_mode_dictionary().keys())),
     input_processing=partial(InputConverters.dictionary_conversion, dictionary=cache.game_mode_dictionary())
 )
 
@@ -482,4 +482,68 @@ user_group = APIParameter(
     arg_name='group_name',
     completer=['Banned'],
     validator=['Banned']
+)
+
+data_tag = APIParameter(
+    prompt = 'Enter the tag name(s) to filter by: ',
+    arg_name='tag',
+    completer=list(cache.game_mode_dictionary().keys()) + ['q'],
+    validator=list(cache.game_mode_dictionary().keys()) + ['q'],
+    loop=True
+)
+
+data_exclude_tag = APIParameter(
+    prompt = 'Enter the tag name(s) to exclude: ',
+    arg_name='exclude_tag',
+    completer=list(cache.game_mode_dictionary().keys()) + ['q'],
+    validator=list(cache.game_mode_dictionary().keys()) + ['q'],
+    loop=True
+)
+
+data_username = APIParameter(
+    prompt='Enter the username(s) to filter by: ',
+    arg_name='username',
+    completer=cache.users() + ['q'],
+    validator=cache.users() + ['q'],
+    loop=True
+)
+
+data_vs_username = APIParameter(
+    prompt='Enter the usernames(s) to filter opponents by: ',
+    arg_name='vs_username',
+    completer=cache.users() + ['q'],
+    validator=cache.users() + ['q'],
+    loop=True
+)
+
+data_exclude_username = APIParameter(
+    prompt='Enter the usernames(s) to exclude: ',
+    arg_name='exclude_username',
+    completer=cache.users() + ['q'],
+    validator=cache.users() + ['q'],
+    loop=True
+)
+
+# Add completers
+data_captain = APIParameter(
+    prompt='Enter the captain(s) to filter by: ',
+    arg_name='captain',
+    loop=True
+)
+
+data_vs_captain = APIParameter(
+    prompt='Enter the captain(s) to filter opponents by: ',
+    arg_name='vs_captain',
+    loop=True
+)
+
+data_stadium = APIParameter(
+    prompt='Enter the stadium(s) to filter by: ',
+    arg_name='stadium',
+    loop=True
+)
+
+data_limit_games = APIParameter(
+    prompt='Enter the number of games to look at: ',
+    arg_name='limit_games',
 )
