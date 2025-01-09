@@ -128,6 +128,17 @@ class InputConverters:
         
         # Return the timestamp
         return int(est_datetime.timestamp())
+    
+    @staticmethod
+    def remove_all_users_list(y_or_n):
+        print(y_or_n)
+        if y_or_n == 'y':
+            user_list = []
+            for user in cache.users():
+                user_list.append(InputConverters.community_manager_converter(user, remove=True))
+            return user_list
+        else:
+            return None
 
 class APIParameter:
     def __init__(
@@ -293,6 +304,13 @@ community_remove_users = APIParameter(
     input_processing=partial(InputConverters.community_manager_converter, remove=True),
 )
 
+community_remove_all_users = APIParameter(
+    arg_name = 'user_list',
+    prompt='Please confirm you would like to remove all users from this community: ',
+    validator=OptionValidator(['y', 'n']),
+    input_processing=InputConverters.remove_all_users_list
+)
+
 manage_user_community_keys = APIParameter(
     prompt='Would you like to create or delete member keys?: ',
     arg_name = 'manage_user_community_keys',
@@ -320,7 +338,7 @@ manage_user_community_keys = APIParameter(
 
 manage_community_admins = APIParameter(
     prompt='Would you like to add or remove community admins?: ',
-    arg_name = 'manage_community_admins',
+    arg_name = 'user_list',
     completer=['add', 'remove'],
     validator=OptionValidator(['add', 'remove']),
     subparameters={
@@ -435,6 +453,12 @@ tag_set_id = APIParameter(
     completer=list(cache.game_mode_dictionary().keys()),
     validator=OptionValidator(list(cache.game_mode_dictionary().keys())),
     input_processing=partial(InputConverters.dictionary_conversion, dictionary=cache.game_mode_dictionary())
+)
+
+community_id = APIParameter(
+    prompt='Enter the community id: ',
+    arg_name='community_id',
+    input_processing=int
 )
 
 game_mode_name_closed = APIParameter(

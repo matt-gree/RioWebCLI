@@ -104,6 +104,20 @@ community_functions = {
         ],
         parse_data=data_parsing.community_user_keys_to_dataframe,
     ),
+    'Update Community Type': FunctionHandler(
+        func=web_func.community_update,
+        inputs=[
+            param.community_id,
+            param.comm_type
+        ],
+    ),
+    'Remove All Users from Community': FunctionHandler(
+        func=web_func.community_manage,
+        inputs=[
+            param.community_name_closed,
+            param.community_remove_all_users,
+        ],
+    )
 }
 
 # Tag Functions
