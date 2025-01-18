@@ -73,8 +73,12 @@ class ParameterProcessor:
             return inputs
 
         user_input = self.prompt_for_input(parameter)
+
         if self.has_subparameters(user_input, parameter):
             return self.execute_prompt(parameter.subparameters[user_input])
+        
+        if user_input == self.break_key:
+            return None
         
         return user_input
 

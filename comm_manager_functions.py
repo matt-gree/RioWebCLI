@@ -260,7 +260,7 @@ game_mode_functions = {
         inputs=[
             param.game_mode_name_closed,
         ],
-    ),
+    )
 }
 
 # Rio Mod Functions
