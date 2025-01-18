@@ -1,3 +1,5 @@
+import sys
+
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
 
@@ -28,7 +30,8 @@ function_groups = {
     'Manage Game Modes': game_mode_functions,
     'Manage Tags': tag_functions,
     'Rio Mod Functions': rio_mod_functions,
-    'Data Endpoints': data_endpoints
+    'Data Endpoints': data_endpoints,
+    'Update Cache': cache.refresh_cache
 }
 print(f'\nMenu Options: ')
 for key in function_groups.keys():
@@ -38,6 +41,10 @@ print()
 selected_function_group = prompt('What would you like to do: ',
                                  completer=WordCompleter(list(function_groups.keys()), ignore_case=True),
                                  validator=OptionValidator(list(function_groups.keys())))
+
+if selected_function_group == 'Update Cache':
+    cache.refresh_cache()
+    sys.exit()
 
 print()
 print(f'{selected_function_group}: ')
@@ -68,3 +75,6 @@ if selected_function.parse_data:
             print(item, '\n')
     else:
         print(result)
+
+if selected_function.refresh_cache:
+    cache.refresh_cache()

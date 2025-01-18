@@ -10,7 +10,8 @@ class FunctionHandler:
         func: Callable,
         inputs: List[param.APIParameter],
         parse_data: Optional[Callable] = None,
-        constant_inputs: Optional[dict] = None
+        constant_inputs: Optional[dict] = None,
+        refresh_cache: bool = False
     ):
         """
         Represents a handler for a specific function.
@@ -25,6 +26,7 @@ class FunctionHandler:
         self.inputs = inputs
         self.parse_data = parse_data
         self.constant_inputs = constant_inputs or {}
+        self.refresh_cache = refresh_cache
 
 
 # Community Functions
@@ -38,6 +40,7 @@ community_functions = {
             param.global_link,
             param.comm_desc,
         ],
+        refresh_cache=True
     ),
     'Add Community Members': FunctionHandler(
         func=web_func.community_invite,
@@ -129,6 +132,7 @@ tag_functions = {
             param.tag_name_free,
             param.tag_desc,
         ],
+        refresh_cache=True
     ),
     'Create Gecko Code Tag': FunctionHandler(
         func=partial(web_func.create_tag, tag_type='Gecko Code'),
@@ -139,6 +143,7 @@ tag_functions = {
             param.gecko_code,
             param.gecko_code_desc,
         ],
+        refresh_cache=True
     ),
     'Update Tag Name': FunctionHandler(
         func=web_func.update_tag,
@@ -146,6 +151,7 @@ tag_functions = {
             param.tag_id,
             param.tag_name_free,
         ],
+        refresh_cache=True
     ),
     'Update Tag Description': FunctionHandler(
         func=web_func.update_tag,
@@ -160,6 +166,7 @@ tag_functions = {
             param.tag_id,
             param.tag_type,
         ],
+        refresh_cache=True
     ),
     'Update Tag Gecko Code Desc': FunctionHandler(
         func=web_func.update_tag,
@@ -191,6 +198,7 @@ game_mode_functions = {
             param.add_tag_ids,
             param.game_mode_to_mirror_tags_from,
         ],
+        refresh_cache=True
     ),
     'Update Game Mode Name': FunctionHandler(
         func=web_func.update_game_mode,
@@ -198,6 +206,7 @@ game_mode_functions = {
             param.tag_set_id,
             param.game_mode_name_free,
         ],
+        refresh_cache=True
     ),
     'Update Game Mode Description': FunctionHandler(
         func=web_func.update_game_mode,
@@ -260,6 +269,7 @@ game_mode_functions = {
         inputs=[
             param.game_mode_name_closed,
         ],
+        refresh_cache=True
     )
 }
 
