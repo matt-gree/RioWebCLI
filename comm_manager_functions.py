@@ -1,8 +1,14 @@
 from typing import List, Optional, Callable
 import project_rio_lib.web_functions as web_func
+import local_functions
 import api_parameters as param
 import data_parsing
 from functools import partial
+from project_rio_lib.api_manager import APIManager
+from project_rio_lib.web_caching import CompleterCache
+
+manager = APIManager()
+cache = CompleterCache(manager)
 
 class FunctionHandler:
     def __init__(
@@ -182,6 +188,16 @@ tag_functions = {
             param.gecko_code,
         ],
     ),
+    'Show Tag Info': FunctionHandler(
+        func=local_functions.get_tag_info,
+        inputs=[
+            param.tag_name_closed
+        ],
+        constant_inputs={
+            'tags_df': cache.return_tags_df()
+        },
+        parse_data=data_parsing.print_df_columns_by_row
+    )
 }
 
 # Game Mode Functions

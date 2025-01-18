@@ -249,6 +249,13 @@ tag_name_free = APIParameter(
     arg_name = 'tag_name_free'
 )
 
+tag_name_closed = APIParameter(
+    prompt='Enter the tag name: ',
+    arg_name='tag_name_closed',
+    completer=list(cache.tags_dictionary().keys()),
+    validator=list(cache.tags_dictionary().keys())
+)
+
 tag_desc = APIParameter(
     prompt='Enter a description for your new tag: ',
     arg_name = 'tag_desc'
@@ -457,3 +464,4 @@ data_limit_games = APIParameter(
     arg_name='limit_games',
     optional=True
 )
+
