@@ -390,7 +390,8 @@ data_tag = APIParameter(
     arg_name='tag',
     completer=list(cache.game_mode_dictionary().keys()),
     validator=list(cache.game_mode_dictionary().keys()),
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_exclude_tag = APIParameter(
@@ -398,7 +399,8 @@ data_exclude_tag = APIParameter(
     arg_name='exclude_tag',
     completer=list(cache.game_mode_dictionary().keys()),
     validator=list(cache.game_mode_dictionary().keys()),
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_username = APIParameter(
@@ -406,7 +408,8 @@ data_username = APIParameter(
     arg_name='username',
     completer=cache.users(),
     validator=cache.users(),
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_vs_username = APIParameter(
@@ -414,7 +417,8 @@ data_vs_username = APIParameter(
     arg_name='vs_username',
     completer=cache.users(),
     validator=cache.users(),
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_exclude_username = APIParameter(
@@ -422,29 +426,34 @@ data_exclude_username = APIParameter(
     arg_name='exclude_username',
     completer=cache.users(),
     validator=cache.users(),
-    loop=True
+    loop=True,
+    optional=True
 )
 
 # Add completers
 data_captain = APIParameter(
     prompt='Enter the captain(s) to filter by: ',
     arg_name='captain',
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_vs_captain = APIParameter(
     prompt='Enter the captain(s) to filter opponents by: ',
     arg_name='vs_captain',
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_stadium = APIParameter(
     prompt='Enter the stadium(s) to filter by: ',
     arg_name='stadium',
-    loop=True
+    loop=True,
+    optional=True
 )
 
 data_limit_games = APIParameter(
     prompt='Enter the number of games to look at: ',
     arg_name='limit_games',
+    optional=True
 )
