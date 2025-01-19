@@ -65,3 +65,21 @@ class DateValidator(Validator):
             datetime.strptime(text, '%m-%d-%Y')
         except ValueError as e:
             raise ValidationError(message='Invalid date format. Use MM-DD-YYYY.') from e
+        
+class IntValidator(Validator):
+    def validate(self, document):
+        """
+        Validates that the input is a valid integer.
+
+        Args:
+            document: The Document instance containing the current user input.
+
+        Raises:
+            ValidationError: If the input is not a valid integer.
+        """
+        text = document.text
+        if not text.isdigit():
+            raise ValidationError(
+                message="Input must be a valid integer.",
+                cursor_position=len(text),  # Place cursor at the end of the input
+            )

@@ -69,27 +69,6 @@ community_functions = {
         ],
         parse_data=data_parsing.community_tags_to_dataframe,
     ),
-    'Add or Remove Community Bans': FunctionHandler(
-        func=web_func.community_manage,
-        inputs=[
-            param.community_name_closed,
-            param.community_manage_bans,
-        ],
-    ),
-    'Remove Community Members': FunctionHandler(
-        func=web_func.community_manage,
-        inputs=[
-            param.community_name_closed,
-            param.community_remove_users,
-        ],
-    ),
-    'Manage Community User Keys': FunctionHandler(
-        func=web_func.community_manage,
-        inputs=[
-            param.community_name_closed,
-            param.manage_user_community_keys,
-        ],
-    ),
     'Manage Community Admins': FunctionHandler(
         func=web_func.community_manage,
         inputs=[
@@ -105,6 +84,13 @@ community_functions = {
         constant_inputs={'action': 'get'},
         parse_data=data_parsing.print_community_sponsor,
     ),
+    'Manage Community User Keys': FunctionHandler(
+        func=web_func.community_manage,
+        inputs=[
+            param.community_name_closed,
+            param.manage_user_community_keys,
+        ],
+    ),
     'Community-Wide User Keys': FunctionHandler(
         func=web_func.community_key,
         inputs=[
@@ -113,11 +99,46 @@ community_functions = {
         ],
         parse_data=data_parsing.community_user_keys_to_dataframe,
     ),
+    'Update Community Description': FunctionHandler(
+        func=web_func.community_update,
+        inputs=[
+            param.community_id,
+            param.comm_desc
+        ],
+    ),
     'Update Community Type': FunctionHandler(
         func=web_func.community_update,
         inputs=[
             param.community_id,
             param.comm_type
+        ],
+    ),
+    'Update Community Privacy': FunctionHandler(
+        func=web_func.community_update,
+        inputs=[
+            param.community_id,
+            param.private
+        ],
+    ),
+    'Update Community Tag Set Limit': FunctionHandler(
+        func=web_func.community_update,
+        inputs=[
+            param.community_id,
+            param.game_mode_limit
+        ],
+    ),
+    'Remove Community Members': FunctionHandler(
+        func=web_func.community_manage,
+        inputs=[
+            param.community_name_closed,
+            param.community_remove_users,
+        ],
+    ),
+    'Add or Remove Community Bans': FunctionHandler(
+        func=web_func.community_manage,
+        inputs=[
+            param.community_name_closed,
+            param.community_manage_bans,
         ],
     ),
     'Remove All Users from Community': FunctionHandler(
@@ -216,28 +237,6 @@ game_mode_functions = {
         ],
         refresh_cache=True
     ),
-    'Update Game Mode Name': FunctionHandler(
-        func=web_func.update_game_mode,
-        inputs=[
-            param.tag_set_id,
-            param.game_mode_name_free,
-        ],
-        refresh_cache=True
-    ),
-    'Update Game Mode Description': FunctionHandler(
-        func=web_func.update_game_mode,
-        inputs=[
-            param.tag_set_id,
-            param.game_mode_desc,
-        ],
-    ),
-    'Update Game Mode Type': FunctionHandler(
-        func=web_func.update_game_mode,
-        inputs=[
-            param.tag_set_id,
-            param.game_mode_type,
-        ],
-    ),
     'Add Tags to Game Mode': FunctionHandler(
         func=web_func.update_game_mode,
         inputs=[
@@ -272,6 +271,28 @@ game_mode_functions = {
             param.tag_set_id,
         ],
         parse_data=data_parsing.game_mode_tags_to_dataframe,
+    ),
+    'Update Game Mode Name': FunctionHandler(
+        func=web_func.update_game_mode,
+        inputs=[
+            param.tag_set_id,
+            param.game_mode_name_free,
+        ],
+        refresh_cache=True
+    ),
+    'Update Game Mode Description': FunctionHandler(
+        func=web_func.update_game_mode,
+        inputs=[
+            param.tag_set_id,
+            param.game_mode_desc,
+        ],
+    ),
+    'Update Game Mode Type': FunctionHandler(
+        func=web_func.update_game_mode,
+        inputs=[
+            param.tag_set_id,
+            param.game_mode_type,
+        ],
     ),
     'Show Game Mode Ladder': FunctionHandler(
         func=web_func.game_mode_ladder,

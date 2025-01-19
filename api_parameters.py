@@ -2,7 +2,7 @@ from typing import List, Optional, Union, Callable
 from functools import partial
 
 from prompt_toolkit.validation import Validator
-from prompt_validators import OptionValidator, GeckoCodeValidator, DateValidator
+from prompt_validators import OptionValidator, GeckoCodeValidator, DateValidator, IntValidator
 from project_rio_lib.web_caching import CompleterCache
 from project_rio_lib.api_manager import APIManager
 
@@ -463,5 +463,12 @@ data_limit_games = APIParameter(
     prompt='Enter the number of games to look at: ',
     arg_name='limit_games',
     optional=True
+)
+
+game_mode_limit = APIParameter(
+    prompt='Enter the new active tag set limit: ',
+    arg_name='active_tag_set_limit',
+    validator=IntValidator(),
+    input_processing=int
 )
 
