@@ -3,8 +3,8 @@ from functools import partial
 
 from prompt_toolkit.validation import Validator
 from prompt_validators import OptionValidator, GeckoCodeValidator, DateValidator, IntValidator
-from project_rio_lib.web_caching import CompleterCache
-from project_rio_lib.api_manager import APIManager
+from pyRio.web_caching import CompleterCache
+from pyRio.api_manager import APIManager
 
 from input_conversion import InputConverters
 

@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 import json
 
-from project_rio_lib.web_functions import community_members
+from pyRio.web_functions import community_members
 
 
 class InputConverters:

@@ -3,8 +3,8 @@ import sys
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter, FuzzyCompleter
 
-from project_rio_lib.api_manager import APIManager
-from project_rio_lib.web_caching import CompleterCache
+from pyRio.api_manager import APIManager
+from pyRio.web_caching import CompleterCache
 from comm_manager_functions import community_functions, tag_functions, game_mode_functions, rio_mod_functions, data_endpoints
 from prompt_validators import OptionValidator
 from api_parameters import APIParameter

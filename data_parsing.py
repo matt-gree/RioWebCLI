@@ -3,8 +3,8 @@ import os
 from datetime import datetime
 import pytz
 
-from project_rio_lib.web_caching import CompleterCache
-from project_rio_lib.endpoint_handling import games_endpoints
+from pyRio.web_caching import CompleterCache
+from pyRio.endpoint_handling import games_endpoints
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None) 

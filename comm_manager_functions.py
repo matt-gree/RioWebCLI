@@ -1,11 +1,11 @@
 from typing import List, Optional, Callable
-import project_rio_lib.web_functions as web_func
+import pyRio.web_functions as web_func
 import local_functions
 import api_parameters as param
 import data_parsing
 from functools import partial
-from project_rio_lib.api_manager import APIManager
-from project_rio_lib.web_caching import CompleterCache
+from pyRio.api_manager import APIManager
+from pyRio.web_caching import CompleterCache
 
 manager = APIManager()
 cache = CompleterCache(manager)
