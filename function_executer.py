@@ -1,5 +1,5 @@
 from typing import List, Union, Dict, Optional
-from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import WordCompleter, FuzzyCompleter
 from prompt_toolkit import prompt
 
 
@@ -25,6 +25,7 @@ class ParameterProcessor:
             str: User input after optional processing, or the break key if entered.
         """
         completer = WordCompleter(parameter.completer, ignore_case=True) if parameter.completer else None
+        completer = FuzzyCompleter(completer) if completer else None
         user_input = prompt(parameter.prompt, completer=completer, validator=parameter.validator, multiline=parameter.multiline)
         
         if user_input == self.break_key:

@@ -1,7 +1,7 @@
 import sys
 
 from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import WordCompleter, FuzzyCompleter
 
 from project_rio_lib.api_manager import APIManager
 from project_rio_lib.web_caching import CompleterCache
@@ -39,7 +39,7 @@ for key in function_groups.keys():
 print()
 
 selected_function_group = prompt('What would you like to do: ',
-                                 completer=WordCompleter(list(function_groups.keys()), ignore_case=True),
+                                 completer=FuzzyCompleter(WordCompleter(list(function_groups.keys()), ignore_case=True)),
                                  validator=OptionValidator(list(function_groups.keys())))
 
 if selected_function_group == 'Update Cache':
@@ -55,7 +55,7 @@ for key in selected_function_group:
 print()
 
 selected_function_str = prompt('What would you like to do: ',
-                                 completer=WordCompleter(list(selected_function_group.keys()), ignore_case=True),
+                                 completer=FuzzyCompleter(WordCompleter(list(selected_function_group.keys()), ignore_case=True)),
                                  validator=OptionValidator(list(selected_function_group.keys())))
 
 executor = ParameterProcessor()
