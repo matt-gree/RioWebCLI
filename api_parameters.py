@@ -262,7 +262,7 @@ tag_desc = APIParameter(
 )
 
 gecko_code = APIParameter(
-    prompt='Enter the gecko code (option-enter to submit on Mac, try shift-enter or control-enter on Windows):\n',
+    prompt='Enter the gecko code (option-enter to submit on Mac, ESC-enter on Windows):\n',
     arg_name = 'gecko_code',
     validator=GeckoCodeValidator(),
     multiline=True

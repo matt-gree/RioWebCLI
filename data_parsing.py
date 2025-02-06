@@ -77,3 +77,11 @@ def games_endpoint_to_excel(cache: CompleterCache, games_endpoint):
     # Save to Excel
     df.to_excel(file_path, index=False)
     return file_path
+
+def game_mode_list_to_dataframe(cache: CompleterCache, games_list_data):
+    df = pd.DataFrame(games_list_data['Tag Sets'])
+
+    # Drop the 'tag_ids' and 'tags' columns
+    df = df.drop(columns=['tag_ids', 'tags'])
+
+    print(df)

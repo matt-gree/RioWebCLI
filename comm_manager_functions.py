@@ -207,7 +207,7 @@ tag_functions = {
         inputs=[
             param.tag_id,
             param.gecko_code,
-        ],
+        ]
     ),
     'Show Tag Info': FunctionHandler(
         func=local_functions.get_tag_info,
@@ -264,6 +264,11 @@ game_mode_functions = {
             param.tag_set_id,
             param.start_date,
         ],
+    ),
+    'List Game Modes': FunctionHandler(
+        func=web_func.list_game_modes,
+        inputs=[],
+        parse_data=data_parsing.game_mode_list_to_dataframe
     ),
     'List Game Mode Tags': FunctionHandler(
         func=web_func.list_game_mode_tags,
