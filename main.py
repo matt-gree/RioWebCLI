@@ -23,8 +23,6 @@ formatted_text = '''
          
     '''
 
-print(formatted_text)
-
 function_groups = {
     'Manage Communities': community_functions,
     'Manage Game Modes': game_mode_functions,
@@ -33,48 +31,59 @@ function_groups = {
     'Data Endpoints': data_endpoints,
     'Update Cache': cache.refresh_cache
 }
-print(f'\nMenu Options: ')
-for key in function_groups.keys():
-    print(f'    {key}')
-print()
 
-selected_function_group = prompt('What would you like to do: ',
-                                 completer=FuzzyCompleter(WordCompleter(list(function_groups.keys()), ignore_case=True)),
-                                 validator=OptionValidator(list(function_groups.keys())))
+print(formatted_text)
 
-if selected_function_group == 'Update Cache':
-    cache.refresh_cache()
-    sys.exit()
+while True:
+    print(f'\nMenu Options: ')
+    for key in function_groups.keys():
+        print(f'    {key}')
+    print()
 
-print()
-print(f'{selected_function_group}: ')
-selected_function_group = function_groups[selected_function_group]
+    selected_function_group = prompt('What would you like to do (or "q" to quit): ',
+                                     completer=FuzzyCompleter(WordCompleter(list(function_groups.keys()) + ['q'], ignore_case=True)),
+                                     validator=OptionValidator(list(function_groups.keys()) + ['q']))
 
-for key in selected_function_group:
-    print(f'    {key}')
-print()
+    if selected_function_group.lower() == 'q':
+        break
 
-selected_function_str = prompt('What would you like to do: ',
-                                 completer=FuzzyCompleter(WordCompleter(list(selected_function_group.keys()), ignore_case=True)),
-                                 validator=OptionValidator(list(selected_function_group.keys())))
+    if selected_function_group == 'Update Cache':
+        cache.refresh_cache()
+        continue
 
-executor = ParameterProcessor()
-selected_function = selected_function_group[selected_function_str]
-function_args = executor.gather_function_args(selected_function.inputs)
-    
-function_args['api_manager'] = manager
+    print()
+    print(f'{selected_function_group}: ')
+    selected_function_group_dict = function_groups[selected_function_group]
 
-if selected_function.constant_inputs:
-    function_args = function_args | selected_function.constant_inputs
+    while True:
+        for key in selected_function_group_dict:
+            print(f'    {key}')
+        print()
 
-output = selected_function.func(**function_args)
-if selected_function.parse_data:
-    result = selected_function.parse_data(cache, output)
-    if isinstance(result, (list, tuple, set)):  
-        for item in result:
-            print(item, '\n')
-    else:
-        print(result)
+        selected_function_str = prompt('What would you like to do ("b" to go back): ',
+                                       completer=FuzzyCompleter(WordCompleter(list(selected_function_group_dict.keys()), ignore_case=True)),
+                                       validator=OptionValidator(list(selected_function_group_dict.keys()) + ['b']))
 
-if selected_function.refresh_cache:
-    cache.refresh_cache()
+        if selected_function_str.lower() == 'b':
+            break
+
+        executor = ParameterProcessor()
+        selected_function = selected_function_group_dict[selected_function_str]
+        function_args = executor.gather_function_args(selected_function.inputs)
+
+        function_args['api_manager'] = manager
+
+        if selected_function.constant_inputs:
+            function_args = function_args | selected_function.constant_inputs
+
+        output = selected_function.func(**function_args)
+        if selected_function.parse_data:
+            result = selected_function.parse_data(cache, output)
+            if isinstance(result, (list, tuple, set)):
+                for item in result:
+                    print(item, '\n')
+            else:
+                print(result)
+
+        if selected_function.refresh_cache:
+            cache.refresh_cache()
