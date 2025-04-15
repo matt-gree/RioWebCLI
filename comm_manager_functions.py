@@ -84,12 +84,13 @@ community_functions = {
         constant_inputs={'action': 'get'},
         parse_data=data_parsing.print_community_sponsor,
     ),
-    'Manage Community User Keys': FunctionHandler(
+    'Create or Delete Single User Keys': FunctionHandler(
         func=web_func.community_manage,
         inputs=[
             param.community_name_closed,
             param.manage_user_community_keys,
         ],
+        parse_data=data_parsing.user_keys_to_dataframe
     ),
     'Community-Wide User Keys': FunctionHandler(
         func=web_func.community_key,

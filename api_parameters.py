@@ -189,13 +189,13 @@ community_remove_all_users = APIParameter(
 
 manage_user_community_keys = APIParameter(
     prompt='Would you like to create or delete member keys?: ',
-    arg_name = 'manage_user_community_keys',
+    arg_name = 'user_list',
     completer=['create', 'delete'],
     validator=['create', 'delete'],
     subparameters={
         'create': APIParameter(
             prompt='Enter the Rio username to create a key for (q to finish): ',
-            arg_name=None,
+            arg_name='None',
             completer=cache.users(),
             validator=cache.users(),
             input_processing=partial(InputConverters.community_manager_converter, key=True),
@@ -203,7 +203,7 @@ manage_user_community_keys = APIParameter(
         ),
         'delete': APIParameter(
             prompt='Enter the Rio username to delete a key for (q to finish): ',
-            arg_name=None,
+            arg_name='None',
             completer=cache.users(),
             validator=cache.users(),
             input_processing=partial(InputConverters.community_manager_converter, key=False),

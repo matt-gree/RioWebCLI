@@ -29,6 +29,11 @@ def community_tags_to_dataframe(cache, community_tags_data):
 def print_community_sponsor(cache, community_sponsor):
     return f'Community Sponsor: {community_sponsor["sponsor"]}'
 
+def user_keys_to_dataframe(cache, community_user_keys_data):
+    df2 = pd.DataFrame(list(cache.users_dictionary().items()), columns=['user_id', 'username'])
+    df2['user_id'] = pd.to_numeric(df2['user_id'])
+    return pd.DataFrame(community_user_keys_data['members']).merge(df2, on='user_id', how='left').set_index('username')
+
 def community_user_keys_to_dataframe(cache, community_user_keys_data):
     return pd.DataFrame(community_user_keys_data)
 
