@@ -68,7 +68,7 @@ class ParameterProcessor:
                 
                 if self.has_subparameters(user_input, parameter):
                     subparam_value = self.execute_prompt(parameter.subparameters[user_input])
-                    inputs.append(subparam_value)
+                    inputs.append({parameter.subparameters[user_input].arg_name: subparam_value})
                 else:
                     inputs.append(user_input)
             return inputs
@@ -101,6 +101,25 @@ class ParameterProcessor:
             if arg_name == '_dict':
                 for key, value in user_input.items():
                     function_args[key] = value
+            elif parameter.data_params_dict:
+                merged = {}
+                print(user_input)
+                for d in user_input:
+                    for key, value in d.items():
+                        # If the key already exists in merged
+                        if key in merged:
+                            # Only merge list-type values
+                            if isinstance(merged[key], list) and isinstance(value, list):
+                                merged[key].extend(value)
+                            elif isinstance(merged[key], list):
+                                merged[key].append(value)
+                            else:
+                                # Don't try to merge non-list values (e.g., bool, str) — overwrite or raise warning
+                                merged[key] = value
+                        else:
+                            # First time seeing the key
+                            merged[key] = value if not isinstance(value, list) else list(value)
+                function_args[arg_name] = merged
             else:
                 function_args[arg_name] = user_input
         

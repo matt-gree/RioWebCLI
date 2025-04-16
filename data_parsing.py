@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 
 from pyRio.web_caching import CompleterCache
-from pyRio.endpoint_handling import games_endpoints
+from pyRio.endpoint_handling import games_endpoints, stats_endpoints
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None) 
@@ -90,3 +90,19 @@ def game_mode_list_to_dataframe(cache: CompleterCache, games_list_data):
     df = df.drop(columns=['tag_ids', 'tags'])
 
     print(df)
+
+def stats_endpoint_to_excel(cache: CompleterCache, stats_endpoint):
+    df = stats_endpoints(stats_endpoint, cache)
+
+    # Specify the folder path in the same directory
+    folder_path = "endpoint_data"
+    os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
+
+    # Generate a filename with the current date
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    file_name = f"stats_data_{current_date_time}.xlsx"
+    file_path = os.path.join(folder_path, file_name)
+
+    # Save to Excel
+    df.to_excel(file_path)
+    return file_path

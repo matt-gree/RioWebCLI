@@ -137,3 +137,16 @@ class InputConverters:
             return user_list
         else:
             return None
+        
+    @staticmethod
+    def merge_list_of_dicts(dict_list):
+        if type(dict_list) is str:
+            return dict_list
+        merged = {}
+        for d in dict_list:
+            for key, value in d.items():
+                if key not in merged:
+                    merged[key] = list(value)  # ensure it's a list
+                else:
+                    merged[key].extend(value)
+        return merged

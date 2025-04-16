@@ -368,16 +368,23 @@ data_endpoints = {
     'Games Endpoint': FunctionHandler(
         func=web_func.games_endpoint,
         inputs=[
-            param.data_tag,
-            param.data_exclude_tag,
-            param.data_username,
-            param.data_vs_username,
-            param.data_exclude_username,
-            param.data_captain,
-            param.data_vs_captain,
-            param.data_stadium,
-            param.data_limit_games
+            param.data_games_tag,
+            param.data_games_exclude_tag,
+            param.data_games_username,
+            param.data_games_vs_username,
+            param.data_games_exclude_username,
+            param.data_games_captain,
+            param.data_games_vs_captain,
+            param.data_games_stadium,
+            param.data_games_limit_games
         ],
         parse_data=data_parsing.games_endpoint_to_excel
+    ),
+    'Stats Endpoint': FunctionHandler(
+        func=web_func.stats_endpoint,
+        inputs=[
+            param.data_games_stats_endpoint_params
+        ],
+        parse_data=data_parsing.stats_endpoint_to_excel
     )
 }

@@ -5,6 +5,7 @@ from prompt_toolkit.validation import Validator
 from prompt_validators import OptionValidator, GeckoCodeValidator, DateValidator, IntValidator
 from pyRio.web_caching import CompleterCache
 from pyRio.api_manager import APIManager
+from pyRio.lookup import LookupDicts, Lookup
 
 from input_conversion import InputConverters
 
@@ -22,7 +23,8 @@ class APIParameter:
         loop: bool = False,
         subparameters: Optional[dict] = None,
         multiline: bool = False,
-        optional: bool = False
+        optional: bool = False,
+        data_params_dict: bool = False
     ):
         """
         Represents an individual API parameter used in prompts.
@@ -45,6 +47,7 @@ class APIParameter:
         self.input_processing = input_processing
         self.subparameters = subparameters or {}
         self.multiline = multiline
+        self.data_params_dict = data_params_dict
 
     def _validate_completer(self, completer: Optional[List[str]]) -> Optional[List[str]]:
         """
@@ -392,7 +395,7 @@ user_group = APIParameter(
     validator=['Banned']
 )
 
-data_tag = APIParameter(
+data_games_tag = APIParameter(
     prompt = 'Enter the tag name(s) to filter by: ',
     arg_name='tag',
     completer=list(cache.game_mode_dictionary().keys()),
@@ -401,7 +404,7 @@ data_tag = APIParameter(
     optional=True
 )
 
-data_exclude_tag = APIParameter(
+data_games_exclude_tag = APIParameter(
     prompt = 'Enter the tag name(s) to exclude: ',
     arg_name='exclude_tag',
     completer=list(cache.game_mode_dictionary().keys()),
@@ -410,7 +413,7 @@ data_exclude_tag = APIParameter(
     optional=True
 )
 
-data_username = APIParameter(
+data_games_username = APIParameter(
     prompt='Enter the username(s) to filter by: ',
     arg_name='username',
     completer=cache.users(),
@@ -419,7 +422,7 @@ data_username = APIParameter(
     optional=True
 )
 
-data_vs_username = APIParameter(
+data_games_vs_username = APIParameter(
     prompt='Enter the usernames(s) to filter opponents by: ',
     arg_name='vs_username',
     completer=cache.users(),
@@ -428,7 +431,7 @@ data_vs_username = APIParameter(
     optional=True
 )
 
-data_exclude_username = APIParameter(
+data_games_exclude_username = APIParameter(
     prompt='Enter the usernames(s) to exclude: ',
     arg_name='exclude_username',
     completer=cache.users(),
@@ -438,28 +441,28 @@ data_exclude_username = APIParameter(
 )
 
 # Add completers
-data_captain = APIParameter(
+data_games_captain = APIParameter(
     prompt='Enter the captain(s) to filter by: ',
     arg_name='captain',
     loop=True,
     optional=True
 )
 
-data_vs_captain = APIParameter(
+data_games_vs_captain = APIParameter(
     prompt='Enter the captain(s) to filter opponents by: ',
     arg_name='vs_captain',
     loop=True,
     optional=True
 )
 
-data_stadium = APIParameter(
+data_games_stadium = APIParameter(
     prompt='Enter the stadium(s) to filter by: ',
     arg_name='stadium',
     loop=True,
     optional=True
 )
 
-data_limit_games = APIParameter(
+data_games_limit_games = APIParameter(
     prompt='Enter the number of games to look at: ',
     arg_name='limit_games',
     optional=True
@@ -472,3 +475,125 @@ game_mode_limit = APIParameter(
     input_processing=int
 )
 
+data_stats_game_ids = APIParameter(
+    prompt='Enter the Game IDs of the games you would like: ',
+    arg_name='games',
+    validator=IntValidator(),
+    optional=True,
+    loop=True
+)
+
+data_stats_character = APIParameter(
+    prompt='Enter the name of the characters to filter by: ',
+    arg_name='char_id',
+    completer=list(LookupDicts.CHAR_NAME.values()),
+    optional=True,
+    loop=True,
+    input_processing=partial(Lookup().lookup, LookupDicts.CHAR_NAME)
+)
+
+data_stats_by_user = APIParameter(
+    prompt='Confirm to filter the result by user: ',
+    arg_name='by_user',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_by_swing = APIParameter(
+    prompt='Confirm to filter the result by swing: ',
+    arg_name='by_swing',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_by_character = APIParameter(
+    prompt='Confirm to filter the result by character: ',
+    arg_name='by_char',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_exclude_nonfair = APIParameter(
+    prompt='Confirm to filter the result by fair balls only: ',
+    arg_name='exclude_nonfair',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_exclude_batting = APIParameter(
+    prompt='Confirm to filter out batting stats: ',
+    arg_name='exclude_batting',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_exclude_pitching = APIParameter(
+    prompt='Confirm to filter out pitching stats: ',
+    arg_name='exclude_pitching',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_exclude_fielding = APIParameter(
+    prompt='Confirm to filter out fielding stats: ',
+    arg_name='exclude_fielding',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+data_stats_exclude_misc = APIParameter(
+    prompt='Confirm to filter out fielding stats: ',
+    arg_name='exclude_misc',
+    completer=['y','n'],
+    input_processing=InputConverters.yes_to_1_converter
+)
+
+
+data_games_stats_endpoint_params = APIParameter(
+    prompt='Which filters would you like to add? ',
+    arg_name='params',
+    completer=['tag',
+        'exclude_tag',
+        'username',
+        'vs. username',
+        'exclude username',
+        'captain',
+        'vs. captain',
+        #exclude captain
+        'stadium',
+        'limit games',
+        'game ids',
+        'characters',
+        'filter by user',
+        'filter by swing',
+        'filter by character',
+        'exclude nonfair',
+        'exclude batting',
+        'exclude pitching',
+        'exclude fielding',
+        'exclude misc'],
+    subparameters={
+        'tag': data_games_tag,
+        'exclude_tag': data_games_exclude_tag,
+        'username': data_games_username,
+        'vs. username': data_games_vs_username,
+        'exclude username': data_games_exclude_username,
+        'captain': data_games_captain,
+        'vs. captain': data_games_vs_captain,
+        #exclude captain
+        'stadium': data_games_stadium,
+        'limit games': data_games_limit_games,
+        'game ids': data_stats_game_ids,
+        'characters': data_stats_character,
+        'filter by user': data_stats_by_user,
+        'filter by swing': data_stats_by_swing,
+        'filter by character': data_stats_by_character,
+        'exclude nonfair': data_stats_exclude_nonfair,
+        'exclude batting': data_stats_exclude_batting,
+        'exclude pitching': data_stats_exclude_pitching,
+        'exclude fielding': data_stats_exclude_fielding,
+        'exclude misc': data_stats_exclude_misc
+    },
+    loop=True,
+    data_params_dict=True
+)
