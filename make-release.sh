@@ -19,31 +19,39 @@ if [[ -z "$VERSION" ]]; then
 fi
 
 RELEASE_NAME="RioWebCLI-v$VERSION"
-RELEASE_DIR="../releases"
-RELEASE_ZIP="$RELEASE_DIR/$RELEASE_NAME.zip"
 
-# Make sure the release directory exists
+# Create ./releases directory inside project
+RELEASE_DIR="$(pwd)/releases"
 mkdir -p "$RELEASE_DIR"
 
-echo "📦 Building $RELEASE_NAME.zip with submodule..."
+FINAL_ZIP="$RELEASE_DIR/$RELEASE_NAME.zip"
+TEMP_ZIP="$RELEASE_NAME-temp.zip"
 
-# Clean up old zips if they exist
-rm -f "$RELEASE_ZIP" pyRio.zip
+echo "📦 Building $RELEASE_NAME.zip with pyRio/ submodule..."
+
+# Clean up old zips
+rm -f "$TEMP_ZIP" pyRio.zip "$FINAL_ZIP"
 
 # Archive main project
-git archive --format=zip HEAD -o "$RELEASE_ZIP"
+git archive --format=zip HEAD -o "$TEMP_ZIP"
 
-# Archive submodule with proper folder structure
+# Archive submodule with correct structure
 cd pyRio
 git archive --format=zip --prefix=pyRio/ HEAD -o "../pyRio.zip"
 cd ..
 
-# Merge submodule into final zip
+# Merge submodule into main zip
 mkdir -p temp_pyRio
 unzip -q pyRio.zip -d temp_pyRio
 cd temp_pyRio
-zip -ur "$RELEASE_ZIP" .
+zip -ur "../$TEMP_ZIP" .
 cd ..
 rm -rf temp_pyRio pyRio.zip
 
-echo "✅ Done! Created $RELEASE_ZIP with pyRio/ included."
+# Move final zip into ./releases/
+echo "📁 Moving final zip to: $FINAL_ZIP"
+mv "$TEMP_ZIP" "$FINAL_ZIP"
+
+# Final confirmation
+echo "✅ Done! Created release:"
+ls -lh "$FINAL_ZIP"
